@@ -1,3 +1,9 @@
+# QTCreator user settings:
+*.user
+
+# Collected test data:
+Data/
+
 # Compiled Object files
 *.slo
 *.lo
