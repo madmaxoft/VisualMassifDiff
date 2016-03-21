@@ -2,6 +2,11 @@
 
 // Implements the MassifParser class representing the parser for Massif-generated datafiles
 
+
+
+
+
+#include "globals.h"
 #include "massifparser.h"
 #include <QIODevice>
 #include "parseinteger.h"
@@ -13,7 +18,8 @@
 
 
 MassifParser::MassifParser(void):
-	Super(nullptr)
+	Super(nullptr),
+	m_LastAllocationDepth(0)
 {
 }
 
@@ -33,19 +39,12 @@ void MassifParser::parse(QIODevice & a_Device)
 		{
 			break;
 		}
-		processLine(buf, lineLen);
+		processLine(buf, static_cast<int>(lineLen));
 		m_CurrentLine += 1;
 	}
 
 	// End any snapshot that was parsed up until now, without a terminating line:
-	if (m_CurrentSnapshot != nullptr)
-	{
-		emit newSnapshotParsed(m_CurrentSnapshot);
-		m_CurrentSnapshot.reset();
-	}
-
-	m_LastAllocation.reset();
-	m_CurrentSnapshot.reset();
+	endCurrentSnapshot();
 }
 
 
@@ -61,7 +60,7 @@ void MassifParser::abortParsing(void)
 
 
 
-void MassifParser::processLine(char * a_Line, qint64 a_LineLen)
+void MassifParser::processLine(char * a_Line, int a_LineLen)
 {
 	// Text constants used for comparisons:
 	static const char strMemHeapB[] = "mem_heap_B=";
@@ -85,11 +84,7 @@ void MassifParser::processLine(char * a_Line, qint64 a_LineLen)
 		case '#':
 		{
 			// End any snapshot that we were parsing up until now:
-			if (m_CurrentSnapshot != nullptr)
-			{
-				emit newSnapshotParsed(m_CurrentSnapshot);
-				m_CurrentSnapshot.reset();
-			}
+			endCurrentSnapshot();
 			break;
 		}  // case '#'
 
@@ -161,16 +156,21 @@ void MassifParser::processLine(char * a_Line, qint64 a_LineLen)
 			}
 			// The first Allocation line. Create the root Allocation and reset allocation stack:
 			createNewSnapshotIfNeeded();
-			// TODO
+			m_LastAllocationDepth = 0;
 			m_LastAllocation = std::make_shared<Allocation>();
+			parseAllocationDetails(a_Line, a_LineLen);
+			m_LastAllocation->setType(Allocation::atRoot);
 			m_CurrentSnapshot->setRootAllocation(m_LastAllocation);
-
 			break;
 		}
 		case ' ':
 		{
-			createNewSnapshotIfNeeded();
-			// TODO: processAllocationLine(a_Line);
+			if (m_CurrentSnapshot == nullptr)
+			{
+				parseError(m_CurrentLine, "Data line found without a header in front of it", a_Line);
+				break;
+			}
+			createAllocationFromLine(a_Line, a_LineLen);
 			break;
 		}
 	}  // switch (first letter)
@@ -186,6 +186,170 @@ void MassifParser::createNewSnapshotIfNeeded(void)
 	{
 		m_CurrentSnapshot = std::make_shared<Snapshot>();
 	}
+}
+
+
+
+
+
+void MassifParser::endCurrentSnapshot(void)
+{
+	if (m_CurrentSnapshot != nullptr)
+	{
+		// Sort the allocations:
+		auto allocation = m_CurrentSnapshot->getRootAllocation();
+		if (allocation != nullptr)
+		{
+			allocation->sortBySize();
+		}
+
+		// Notify about the new snapshot:
+		emit newSnapshotParsed(m_CurrentSnapshot);
+
+		// Reset everything:
+		m_CurrentSnapshot.reset();
+		m_LastAllocation.reset();
+		m_LastAllocationDepth = 0;
+	}
+}
+
+
+
+
+
+void MassifParser::createAllocationFromLine(const char * a_Line, int a_LineLen)
+{
+	// Check that we already have an allocation present:
+	if (m_LastAllocation == nullptr)
+	{
+		emit parseError(m_CurrentLine, "Child data line without a parent line", a_Line);
+		return;
+	}
+
+	// Calculate the depth of the new Allocation, by enumerating all the spaces at line start:
+	unsigned depth = 0;
+	for (int i = 0; i < a_LineLen; i++)
+	{
+		if (a_Line[i] != ' ')
+		{
+			depth = static_cast<unsigned>(i);
+			break;
+		}
+	}
+
+	// Create the new allocation as a child of a correct parent
+	// Walk up from m_LastAllocation to match the calculated depth:
+	if (m_LastAllocationDepth >= depth)
+	{
+		for (unsigned i = m_LastAllocationDepth; i >= depth; i--)
+		{
+			m_LastAllocation = m_LastAllocation->getParent();
+			assert(m_LastAllocation != nullptr);
+		}
+	}
+	m_LastAllocation = m_LastAllocation->addChild();
+	m_LastAllocationDepth = depth;
+
+	// Parse the information on the rest of the line into the Allocation's details:
+	parseAllocationDetails(a_Line + depth, a_LineLen - depth);
+}
+
+
+
+
+
+void MassifParser::parseAllocationDetails(const char * a_Line, int a_LineLen)
+{
+	/* Line examples:
+	"n77: 76933037 (heap allocation functions) malloc/new/new[], --alloc-fns, etc."
+	"n1: 24903680 0x55C871: cChunk::SetAllData(cSetChunkData&) (Chunk.cpp:313)"
+	"n0: 640 in 1 place, below massif's threshold (0.00%)"
+	"n1: 122880 0x551202E: ??? (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21)"
+	*/
+
+	// Skip any initial whitespaces:
+	int idx = 0;
+	while ((idx < a_LineLen) && (a_Line[idx] <= ' '))
+	{
+		idx += 1;
+	}
+	if (idx >= a_LineLen)
+	{
+		return;
+	}
+
+	// Check and skip the "n<int>:" signature
+	if (a_Line[idx] != 'n')
+	{
+		return;
+	}
+	idx += 1;  // Skip the "n"
+	while ((idx < a_LineLen) && isdigit(a_Line[idx]))  // Skip the number
+	{
+		idx += 1;
+	}
+	if (idx + 1 >= a_LineLen)
+	{
+		return;
+	}
+	if (a_Line[idx] != ':')
+	{
+		return;
+	}
+	idx += 1;  // Skip the colon
+	while ((idx < a_LineLen) && (a_Line[idx] <= ' '))  // Skip any trailing whitespace
+	{
+		idx += 1;
+	}
+	if (idx + 1 >= a_LineLen)
+	{
+		return;
+	}
+
+	// Parse the allocation size:
+	quint64 allocationSize = 0;
+	while ((idx < a_LineLen) && isdigit(a_Line[idx]))
+	{
+		allocationSize = allocationSize * 10 + (a_Line[idx] - '0');
+		idx += 1;
+	}
+	m_LastAllocation->setAllocationSize(allocationSize);
+	if (idx >= a_LineLen)
+	{
+		return;
+	}
+	while ((idx < a_LineLen) && (a_Line[idx] <= ' '))  // Skip the trailing whitespace
+	{
+		idx += 1;
+	}
+	if (idx >= a_LineLen)
+	{
+		return;
+	}
+
+	// If the next item starts with "in", conside this a "below threshold" entry:
+	if (
+		(idx + 1 > a_LineLen) &&
+		(a_Line[idx] == 'i') &&
+		(a_Line[idx] == 'n')
+	)
+	{
+		// No more data to be parsed for this entry
+		m_LastAllocation->setType(Allocation::atBelowThreshold);
+		return;
+	}
+
+	// If the next item starts with "(", consider this the root entry:
+	if (
+		(idx > a_LineLen) &&
+		(a_Line[idx] == '(')
+	)
+	{
+		m_LastAllocation->setType(Allocation::atRoot);
+		return;
+	}
+
+	// TODO: Parse the address, function name etc.
 }
 
 

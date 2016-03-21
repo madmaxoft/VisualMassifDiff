@@ -68,8 +68,12 @@ protected:
 	/** The snapshot that is currently being parsed. */
 	SnapshotPtr m_CurrentSnapshot;
 
-	/** */
+	/** The last Allocation instance created from a data line in the file. */
 	AllocationPtr m_LastAllocation;
+
+	/** The nesting depth of m_LastAllocation.
+	Used to find the correct parent for the next Allocation instance, by walking from m_LastAllocation up, if needed. */
+	unsigned m_LastAllocationDepth;
 
 	/** Current line being parsed (in parse() method), 1-based. */
 	quint32 m_CurrentLine;
@@ -80,13 +84,24 @@ protected:
 
 
 	/** Processes a single input line. */
-	void processLine(char * a_Line, qint64 a_LineLen);
+	void processLine(char * a_Line, int a_LineLen);
 
 	/** Processes a single input line that describes an Allocation ("<spaces>n<number>: " lines). */
-	void processAllocationLine(const char * a_Line, qint64 a_LineLen);
+	void processAllocationLine(const char * a_Line, int a_LineLen);
 
 	/** If m_CurrentSnapshot is empty, creates a new snapshot and assigns it to m_CurrentSnapshot. */
 	void createNewSnapshotIfNeeded(void);
+
+	/** If m_CurrentSnapshot is valid, signalizes that it has been parsed and resets it to empty. */
+	void endCurrentSnapshot(void);
+
+	/** Creates a new Allocation instance from the specified line, and assigns it into m_LastAllocation.
+	Uses m_LastAllocationDepth to find the correct parent for the new Allocation. */
+	void createAllocationFromLine(const char * a_Line, int a_LineLen);
+
+	/** Parses the line contents into m_LastAllocation's details.
+	Receives the entire Allocation line, including the spaces and "n<int>: " header. */
+	void parseAllocationDetails(const char * a_Line, int a_LineLen);
 };
 
 
