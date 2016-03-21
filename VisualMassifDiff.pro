@@ -12,35 +12,40 @@ TARGET = VisualMassifDiff
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-		mainwindow.cpp \
-    project.cpp \
-    snapshot.cpp \
-    allocation.cpp \
-    massifparser.cpp \
-    dlgsnapshotdetails.cpp \
-    allocationsgraph.cpp \
-    formatnumber.cpp \
-    snapshotsgraph.cpp
+SOURCES += \
+	main.cpp \
+	mainwindow.cpp \
+	project.cpp \
+	snapshot.cpp \
+	allocation.cpp \
+	massifparser.cpp \
+	dlgsnapshotdetails.cpp \
+	allocationsgraph.cpp \
+	formatnumber.cpp \
+	snapshotsgraph.cpp
 
-HEADERS  += mainwindow.h \
-    project.h \
-    snapshot.h \
-    allocation.h \
-    massifparser.h \
-    parseinteger.h \
-    dlgsnapshotdetails.h \
-    allocationsgraph.h \
-    formatnumber.h \
-    globals.h \
-    snapshotsgraph.h
+HEADERS  += \
+	mainwindow.h \
+	project.h \
+	snapshot.h \
+	allocation.h \
+	massifparser.h \
+	parseinteger.h \
+	dlgsnapshotdetails.h \
+	allocationsgraph.h \
+	formatnumber.h \
+	globals.h \
+	snapshotsgraph.h
 
-FORMS    += mainwindow.ui \
-    dlgsnapshotdetails.ui
+FORMS += \
+	mainwindow.ui \
+	dlgsnapshotdetails.ui
 
 OTHER_FILES += \
-    .gitignore \
-    README.md
+	.gitignore \
+	README.md
 
 RESOURCES += \
-    VisualMassifDiff.qrc
+	VisualMassifDiff.qrc
+
+CONFIG += C++11
