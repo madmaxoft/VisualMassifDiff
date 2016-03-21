@@ -2,6 +2,11 @@
 
 // Implements the Snapshot class, representing a single snapshot of the heap
 
+
+
+
+
+#include "globals.h"
 #include "snapshot.h"
 
 

@@ -2,6 +2,11 @@
 
 // Implements the project class representing a project - collection of snapshots.
 
+
+
+
+
+#include "globals.h"
 #include "project.h"
 #include "snapshot.h"
 
@@ -37,13 +42,43 @@ void Project::addSnapshot(SnapshotPtr a_Snapshot)
 
 
 
+size_t Project::getNumSnapshots() const
+{
+	return m_Snapshots.size();
+}
+
+
+
+
+SnapshotPtr Project::getSnapshotAtTimestamp(quint64 a_Timestamp)
+{
+	for (auto itr = m_Snapshots.begin(), end = m_Snapshots.end(); itr != end; ++itr)
+	{
+		auto timestamp = (*itr)->getTimestamp();
+		if (timestamp == a_Timestamp)
+		{
+			return *itr;
+		}
+		else if (timestamp > a_Timestamp)
+		{
+			return nullptr;
+		}
+	}
+	return nullptr;
+}
+
+
+
+
+
 bool Project::hasSnapshotForTimestamp(quint64 a_Timestamp) const
 {
 	for (auto itr = m_Snapshots.begin(), end = m_Snapshots.end(); itr != end; ++itr)
 	{
-		if ((*itr)->getTimestamp() >= a_Timestamp)
+		auto timestamp = (*itr)->getTimestamp();
+		if (timestamp >= a_Timestamp)
 		{
-			return ((*itr)->getTimestamp() == a_Timestamp);
+			return (timestamp == a_Timestamp);
 		}
 	}
 	return false;

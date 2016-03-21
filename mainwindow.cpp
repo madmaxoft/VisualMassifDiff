@@ -2,6 +2,11 @@
 
 // Implements the MainWindow class representing the main app window
 
+
+
+
+
+#include "globals.h"
 #include "mainwindow.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -13,37 +18,15 @@
 #include "massifparser.h"
 #include "project.h"
 #include "snapshot.h"
+#include "dlgsnapshotdetails.h"
+#include "formatnumber.h"
 
 
 
 
 
 /** Role used as a storage for the snapshot data in the tree widget. */
-const int TW_ITEM_DATAROLE_SNAPSHOT = 1001;
-
-
-
-
-
-static QString formatMemorySize(quint64 a_Size)
-{
-	QString res("%1");
-	res = res.arg((a_Size + 1023) / 1024);  // round up to nearest KiB
-
-	// Insert spaces as a thousand-separator:
-	auto i = res.lastIndexOf('.');
-	if (i < 0)
-	{
-		i = res.length();
-	}
-	i -= 3;
-	while(i > 0)
-	{
-		res.insert(i, ' ');
-		i -= 3;
-	}
-	return res;
-}
+const int TW_ITEM_DATAROLE_SNAPSHOT_TIMESTAMP = 1001;
 
 
 
@@ -60,7 +43,8 @@ MainWindow::MainWindow(QWidget * parent):
 	m_Project = std::make_shared<Project>();
 
 	// Connect the UI signals / slots:
-	connect(m_UI->actSnapshotsAdd, SIGNAL(triggered()), this, SLOT(addSnapshotsFromFile()));
+	connect(m_UI->actSnapshotsAdd, SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
+	connect(m_UI->twSnapshots,     SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(twItemDblClicked(QTreeWidgetItem *, int)));
 }
 
 
@@ -195,6 +179,32 @@ void MainWindow::parsedTimeUnit(const char * a_TimeUnit)
 
 
 
+void MainWindow::twItemDblClicked(QTreeWidgetItem * a_Item, int a_Column)
+{
+	a_Column;
+
+	auto timestamp = a_Item->data(0, TW_ITEM_DATAROLE_SNAPSHOT_TIMESTAMP);
+	auto snapshot = m_Project->getSnapshotAtTimestamp(timestamp.toULongLong());
+	if (snapshot != nullptr)
+	{
+		viewSnapshotDetails(snapshot);
+	}
+}
+
+
+
+
+
+void MainWindow::viewSnapshotDetails(SnapshotPtr a_Snapshot)
+{
+	auto dlg = new DlgSnapshotDetails;
+	dlg->show(a_Snapshot);
+}
+
+
+
+
+
 QTreeWidgetItem * MainWindow::createSnapshotTreeItem(SnapshotPtr a_Snapshot)
 {
 	QStringList columns;
@@ -202,7 +212,7 @@ QTreeWidgetItem * MainWindow::createSnapshotTreeItem(SnapshotPtr a_Snapshot)
 	columns << formatMemorySize(a_Snapshot->getHeapSize());
 	columns << formatMemorySize(a_Snapshot->getHeapExtraSize());
 	auto res = new QTreeWidgetItem(columns);
-	res->setData(0, TW_ITEM_DATAROLE_SNAPSHOT, QVariant::fromValue(reinterpret_cast<void *>(a_Snapshot.get())));
+	res->setData(0, TW_ITEM_DATAROLE_SNAPSHOT_TIMESTAMP, a_Snapshot->getTimestamp());
 	res->setTextAlignment(0, Qt::AlignRight | Qt::AlignVCenter);
 	res->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
 	res->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);

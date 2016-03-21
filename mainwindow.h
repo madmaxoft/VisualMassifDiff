@@ -51,7 +51,7 @@ public:
 public slots:
 
 	/** Opens a file dialog to choose file, then adds the file contents as new snapshots. */
-	void addSnapshotsFromFile(void);
+	void addSnapshotsFromFile();
 
 	/** Adds snapshots from the specified file into the project. */
 	void addSnapshotsFromFile(const QString & a_FileName);
@@ -69,6 +69,12 @@ public slots:
 	/** The time unit used for creating the Massif file has been parsed.
 	Checks with the project if it is the same, aborts parse if not. */
 	void parsedTimeUnit(const char * a_TimeUnit);
+
+	/** Triggered when a snapshot is double-clicked in the treeview. */
+	void twItemDblClicked(QTreeWidgetItem * a_Item, int a_Column);
+
+	/** Opens a snapshot details window for the specified snapshot. */
+	void viewSnapshotDetails(SnapshotPtr a_Snapshot);
 
 private:
 

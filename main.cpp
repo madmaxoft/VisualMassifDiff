@@ -2,6 +2,11 @@
 
 // Implements the main application entrypoint
 
+
+
+
+
+#include "globals.h"
 #include "mainwindow.h"
 #include <QApplication>
 

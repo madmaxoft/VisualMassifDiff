@@ -36,6 +36,9 @@ public:
 	/** Returns the number of snapshots contained in the project. */
 	size_t getNumSnapshots(void) const;
 
+	/** Returns the snapshot with the specified timestamp, or nullptr if no such timestamp found. */
+	SnapshotPtr getSnapshotAtTimestamp(quint64 a_Timestamp);
+
 	/** Returns true if the project already contains a snapshot with the specified timestamp. */
 	bool hasSnapshotForTimestamp(quint64 a_Timestamp) const;
 

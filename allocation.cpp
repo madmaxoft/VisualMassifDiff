@@ -2,6 +2,11 @@
 
 // Declares the Allocation class representing a single entry in the heap allocation tree
 
+
+
+
+
+#include "globals.h"
 #include "allocation.h"
 
 
