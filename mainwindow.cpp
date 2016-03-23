@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget * parent):
 
 	// Create a new empty project:
 	m_Project = std::make_shared<Project>();
+	m_UI->graph->setProject(m_Project);
 
 	// Connect the UI signals / slots:
 	connect(m_UI->actSnapshotsAdd, SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
@@ -132,6 +133,7 @@ void MainWindow::newSnapshotParsed(SnapshotPtr a_Snapshot)
 	// Add snapshot to list:
 	auto item = createSnapshotTreeItem(a_Snapshot);
 	m_UI->twSnapshots->addTopLevelItem(item);
+	m_UI->graph->projectChanged();
 }
 
 

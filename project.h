@@ -20,6 +20,7 @@
 // fwd:
 class Snapshot;
 typedef std::shared_ptr<Snapshot> SnapshotPtr;
+typedef std::list<SnapshotPtr> SnapshotPtrs;
 
 
 
@@ -55,11 +56,9 @@ public:
 	std::string getCommand(void) const { return m_Command; }
 	std::string getTimeUnit(void) const { return m_TimeUnit; }
 
+	const SnapshotPtrs & getSnapshots() const { return m_Snapshots; }
+
 protected:
-
-	/** The type used for the internal collection of snapshots. */
-	typedef std::list<SnapshotPtr> SnapshotPtrs;
-
 
 	/** The snapshots contained within the project. */
 	SnapshotPtrs m_Snapshots;

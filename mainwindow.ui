@@ -97,7 +97,7 @@
         </property>
        </column>
       </widget>
-      <widget class="QWidget" name="graph" native="true">
+      <widget class="SnapshotsGraph" name="graph" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>4</horstretch>
@@ -192,6 +192,14 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>SnapshotsGraph</class>
+   <extends>QWidget</extends>
+   <header>snapshotsgraph.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

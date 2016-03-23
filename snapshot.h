@@ -41,13 +41,14 @@ public:
 	Cannot replace an allocation that has already been set (write-once).*/
 	void setRootAllocation(AllocationPtr a_RootAllocation);
 
-	quint64 getTimestamp(void) const { return m_Timestamp; }
-	quint64 getHeapSize(void) const { return m_HeapSize; }
-	quint64 getHeapExtraSize(void) const { return m_HeapExtraSize; }
-	AllocationPtr getRootAllocation(void) { return m_RootAllocation; }
+	quint64 getTimestamp() const { return m_Timestamp; }
+	quint64 getHeapSize() const { return m_HeapSize; }
+	quint64 getHeapExtraSize() const { return m_HeapExtraSize; }
+	quint64 getTotalSize() const { return m_HeapSize + m_HeapExtraSize; }
+	AllocationPtr getRootAllocation() { return m_RootAllocation; }
 
 	/** Returns true if the snapshot has detailed allocations attached to it. */
-	bool hasAllocations(void) const { return (m_RootAllocation != nullptr); }
+	bool hasAllocations() const { return (m_RootAllocation != nullptr); }
 
 
 protected:
