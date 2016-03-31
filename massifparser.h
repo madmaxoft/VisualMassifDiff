@@ -22,6 +22,12 @@ class Allocation;
 typedef std::shared_ptr<Allocation> AllocationPtr;
 class Snapshot;
 typedef std::shared_ptr<Snapshot> SnapshotPtr;
+class Project;
+typedef std::shared_ptr<Project> ProjectPtr;
+class CodeLocationFactory;
+typedef std::shared_ptr<CodeLocationFactory> CodeLocationFactoryPtr;
+class CodeLocation;
+typedef std::shared_ptr<CodeLocation> CodeLocationPtr;
 
 
 
@@ -36,8 +42,11 @@ class MassifParser:
 
 public:
 
-	explicit MassifParser(void);
+	/** Creates a new parser bound to the specified project.
+	The parser doesn't insert the Snapshots to the project, but needs to bind to existing CodeLocations. */
+	explicit MassifParser(ProjectPtr a_Project);
 
+	/** Parses the data coming from the IODevice into snapshots, those are then reported via signals. */
 	void parse(QIODevice & a_Device);
 
 signals:
@@ -64,6 +73,9 @@ public slots:
 	void abortParsing(void);
 
 protected:
+
+	/** The factory that manages CodeLocationPtr instances. */
+	CodeLocationFactoryPtr m_CodeLocationFactory;
 
 	/** The snapshot that is currently being parsed. */
 	SnapshotPtr m_CurrentSnapshot;
@@ -102,6 +114,11 @@ protected:
 	/** Parses the line contents into m_LastAllocation's details.
 	Receives the entire Allocation line, including the spaces and "n<int>: " header. */
 	void parseAllocationDetails(const char * a_Line, int a_LineLen);
+
+	/** Parses the code location details from the given string.
+	The string contains all the Massif's data after the hex address, starting with the colon:
+	": cChunk::SetAllData(cSetChunkData&) (Chunk.cpp:313)" */
+	void parseCodeLocation(CodeLocationPtr a_Location, const char * a_Line, int a_LineLength);
 };
 
 

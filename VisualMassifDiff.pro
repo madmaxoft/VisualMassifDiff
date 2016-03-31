@@ -22,7 +22,9 @@ SOURCES += \
 	dlgsnapshotdetails.cpp \
 	allocationsgraph.cpp \
 	formatnumber.cpp \
-	snapshotsgraph.cpp
+	snapshotsgraph.cpp \
+	codelocation.cpp \
+	codelocationfactory.cpp
 
 HEADERS  += \
 	mainwindow.h \
@@ -35,7 +37,9 @@ HEADERS  += \
 	allocationsgraph.h \
 	formatnumber.h \
 	globals.h \
-	snapshotsgraph.h
+	snapshotsgraph.h \
+	codelocation.h \
+	codelocationfactory.h
 
 FORMS += \
 	mainwindow.ui \
@@ -49,3 +53,4 @@ RESOURCES += \
 	VisualMassifDiff.qrc
 
 CONFIG += C++11
+

@@ -12,6 +12,7 @@
 #include <memory>
 #include <vector>
 #include <QString>
+#include "codelocation.h"
 
 
 
@@ -54,18 +55,16 @@ public:
 	AllocationPtr getParent();
 
 	void setAllocationSize(quint64 a_AllocationSize) { m_AllocationSize = a_AllocationSize; }
-	void setAddress(quint64 a_Address) { m_Address = a_Address; }
-	void setFunctionName(const QString & a_FunctionName) { m_FunctionName = a_FunctionName; }
-	void setFileName(const QString & a_FileName) { m_FileName = a_FileName; }
-	void setFileLineNum(quint32 a_FileLineNum) { m_FileLineNum = a_FileLineNum; }
+	void setCodeLocation(CodeLocationPtr a_CodeLocation) { m_CodeLocation = a_CodeLocation; }
 	void setType(Type a_Type) { m_Type = a_Type; }
 
-	quint64 getAllocationSize() const { return m_AllocationSize; }
-	quint64 getAddress() const { return m_Address; }
-	const QString & getFunctionName() const { return m_FunctionName; }
-	const QString & getFileName() const { return m_FileName; }
-	quint32 getFileLineNum() const { return m_FileLineNum; }
-	Type getType() const { return m_Type; }
+	quint64         getAllocationSize() const { return m_AllocationSize; }
+	quint64         getAddress()        const { return m_CodeLocation->getAddress(); }
+	const QString & getFunctionName()   const { return m_CodeLocation->getFunctionName(); }
+	const QString & getFileName()       const { return m_CodeLocation->getFileName(); }
+	quint32         getFileLineNum()    const { return m_CodeLocation->getFileLineNum(); }
+	Type            getType()           const { return m_Type; }
+	CodeLocationPtr getCodeLocation()   const { return m_CodeLocation; }
 
 	/** Returns true if the allocation has any children. */
 	bool hasChildren() const { return m_Children.empty(); }
@@ -83,20 +82,9 @@ protected:
 	/** Number of bytes of allocated memory. */
 	quint64 m_AllocationSize;
 
-	/** The address of the allocation stack entry. */
-	quint64 m_Address;
-
-	/** The name of the function representing this allocation stack entry.
-	Empty if not available, may also be "???" if valgrind fails to identify the location. */
-	QString m_FunctionName;
-
-	/** Source code file representing this allocation stack entry.
-	Empty if not available. */
-	QString m_FileName;
-
-	/** Source code line number representing this allocation stack entry.
-	0 if not available. */
-	quint32 m_FileLineNum;
+	/** Stack entry code location of where the allocation was created.
+	May be nullptr for unknown locations. */
+	CodeLocationPtr m_CodeLocation;
 
 	/** Type of the entry - root, regular, belowthreshold, unknown. */
 	Type m_Type;

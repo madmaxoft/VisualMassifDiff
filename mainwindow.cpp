@@ -90,7 +90,7 @@ void MainWindow::addSnapshotsFromFile(const QString & a_FileName)
 
 	// Parse the file:
 	// TODO: Move this to a background thread (?)
-	MassifParser parser;
+	MassifParser parser(m_Project);
 	connect(&parser, SIGNAL(parseError(quint32, const char *, const char *)), this, SLOT(parseError(quint32, const char *, const char *)));
 	connect(&parser, SIGNAL(newSnapshotParsed(SnapshotPtr)),                  this, SLOT(newSnapshotParsed(SnapshotPtr)));
 	connect(&parser, SIGNAL(parsedCommand(const char *)),                     this, SLOT(parsedCommand(const char *)));

@@ -2,6 +2,10 @@
 
 // Declares the project class representing a project - collection of snapshots.
 
+
+
+
+
 #ifndef PROJECT_H
 #define PROJECT_H
 
@@ -21,6 +25,8 @@
 class Snapshot;
 typedef std::shared_ptr<Snapshot> SnapshotPtr;
 typedef std::list<SnapshotPtr> SnapshotPtrs;
+class CodeLocationFactory;
+typedef std::shared_ptr<CodeLocationFactory> CodeLocationFactoryPtr;
 
 
 
@@ -58,10 +64,15 @@ public:
 
 	const SnapshotPtrs & getSnapshots() const { return m_Snapshots; }
 
+	CodeLocationFactoryPtr getCodeLocationFactory() { return m_CodeLocationFactory; }
+
 protected:
 
 	/** The snapshots contained within the project. */
 	SnapshotPtrs m_Snapshots;
+
+	/** The factory that manages all CodeLocation instances used by the project's snapshots. */
+	CodeLocationFactoryPtr m_CodeLocationFactory;
 
 	/** The command used to create the Massif files for this project.
 	Used to check when adding new files that they come from the same Massif settings. */

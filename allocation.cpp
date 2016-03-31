@@ -15,8 +15,6 @@
 
 Allocation::Allocation():
 	m_AllocationSize(0),
-	m_Address(0),
-	m_FileLineNum(0),
 	m_Type(atUnknown)
 {
 }
@@ -28,8 +26,6 @@ Allocation::Allocation():
 Allocation::Allocation(AllocationWeakPtr a_Parent):
 	m_Parent(a_Parent),
 	m_AllocationSize(0),
-	m_Address(0),
-	m_FileLineNum(0),
 	m_Type(atUnknown)
 {
 }

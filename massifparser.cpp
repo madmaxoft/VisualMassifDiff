@@ -12,13 +12,94 @@
 #include "parseinteger.h"
 #include "snapshot.h"
 #include "allocation.h"
+#include "project.h"
+#include "codelocationfactory.h"
 
 
 
 
 
-MassifParser::MassifParser(void):
+/** Returns true if the specified character represents a valid hex digit.
+Must be synchronized with hexDigitToValue(). */
+static bool isHexDigit(char a_Character)
+{
+	switch (a_Character)
+	{
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'd':
+		case 'e':
+		case 'f':
+		case 'A':
+		case 'B':
+		case 'C':
+		case 'D':
+		case 'E':
+		case 'F':
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+
+
+/** */
+static quint64 hexDigitToValue(char a_HexDigit)
+{
+	switch (a_HexDigit)
+	{
+		case '0': return 0;
+		case '1': return 1;
+		case '2': return 2;
+		case '3': return 3;
+		case '4': return 4;
+		case '5': return 5;
+		case '6': return 6;
+		case '7': return 7;
+		case '8': return 8;
+		case '9': return 9;
+		case 'a': return 10;
+		case 'b': return 11;
+		case 'c': return 12;
+		case 'd': return 13;
+		case 'e': return 14;
+		case 'f': return 15;
+		case 'A': return 10;
+		case 'B': return 11;
+		case 'C': return 12;
+		case 'D': return 13;
+		case 'E': return 14;
+		case 'F': return 15;
+	}
+	assert(!"Bad hex digit, should have been checked with isHexDigit()");
+	return 0;
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// MassifParser:
+
+MassifParser::MassifParser(ProjectPtr a_Project):
 	Super(nullptr),
+	m_CodeLocationFactory(a_Project->getCodeLocationFactory()),
 	m_LastAllocationDepth(0)
 {
 }
@@ -329,9 +410,9 @@ void MassifParser::parseAllocationDetails(const char * a_Line, int a_LineLen)
 
 	// If the next item starts with "in", conside this a "below threshold" entry:
 	if (
-		(idx + 1 > a_LineLen) &&
+		(idx + 1 < a_LineLen) &&
 		(a_Line[idx] == 'i') &&
-		(a_Line[idx] == 'n')
+		(a_Line[idx + 1] == 'n')
 	)
 	{
 		// No more data to be parsed for this entry
@@ -341,7 +422,7 @@ void MassifParser::parseAllocationDetails(const char * a_Line, int a_LineLen)
 
 	// If the next item starts with "(", consider this the root entry:
 	if (
-		(idx > a_LineLen) &&
+		(idx < a_LineLen) &&
 		(a_Line[idx] == '(')
 	)
 	{
@@ -349,7 +430,121 @@ void MassifParser::parseAllocationDetails(const char * a_Line, int a_LineLen)
 		return;
 	}
 
-	// TODO: Parse the address, function name etc.
+	// If the next item starts with "0x", consider it the code location address:
+	if (
+		(idx + 1 < a_LineLen) &&
+		(a_Line[idx]     == '0') &&
+		(a_Line[idx + 1] == 'x')
+	)
+	{
+		idx += 2;
+		quint64 address = 0;
+		while ((idx < a_LineLen) && isHexDigit(a_Line[idx]))
+		{
+			address = address * 16 + hexDigitToValue(a_Line[idx]);
+			idx += 1;
+		}
+		bool isNew;
+		auto codeLocation = m_CodeLocationFactory->getCodeLocation(address, isNew);
+		m_LastAllocation->setCodeLocation(codeLocation);
+		if (isNew)
+		{
+			parseCodeLocation(codeLocation, a_Line + idx, a_LineLen - idx);
+		}
+		return;
+	}
+
+	// TODO: Unknown item
+	assert(!"Unknown code location item");
+}
+
+
+
+
+
+void MassifParser::parseCodeLocation(CodeLocationPtr a_Location, const char * a_Line, int a_LineLength)
+{
+	/* Example location values:
+	": ??? (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21)"
+	": cChunk::SetAllData(cSetChunkData&) (Chunk.cpp:313)"
+	": cListAllocationPool<cChunkData::sChunkSection, 1600ul>::Allocate() (AllocationPool.h:81)"
+	*/
+
+	if (a_LineLength < 3)
+	{
+		return;
+	}
+	a_Location->setHasTriedParsing();
+
+	// Skip the colon and space, both are optional:
+	int idx = 0;
+	if (a_Line[0] == ':')
+	{
+		idx += 1;
+	}
+	while ((idx < a_LineLength) && (a_Line[idx] == ' '))
+	{
+		idx += 1;
+	}
+	if (idx >= a_LineLength)
+	{
+		return;
+	}
+
+	// If the data starts with "??? (in ", consider this an unknown location:
+	if (strncmp(a_Line + idx, "??? (in ", a_LineLength - idx) == 0)
+	{
+		a_Location->setFunctionName("???");
+		a_Location->setFileName(QString::fromUtf8(a_Line + idx + 8, a_LineLength - idx - 8));
+		return;
+	}
+
+	// If there's no filename / linenumber information at the end, consider everything a function name:
+	int end = a_LineLength - 2;
+	if (a_Line[end] != ')')
+	{
+		a_Location->setFunctionName(QString::fromUtf8(a_Line + idx, a_LineLength - idx));
+	}
+
+	// Parse from the end, try to cut off the filename and line number:
+	end -= 1;
+	int order = 1;
+	int lineNum = 0;
+	while ((end >= idx) && isdigit(a_Line[end]))
+	{
+		lineNum = lineNum + order * (a_Line[end] - '0');
+		order = order * 10;
+		end -= 1;
+	}
+	a_Location->setFileLineNum(lineNum);
+	if (end - 1 <= idx)
+	{
+		return;
+	}
+	if (a_Line[end] == ':')
+	{
+		end -= 1;
+	}
+	int fileNameEnd = end;
+	while ((end >= idx) && (a_Line[end] != '('))
+	{
+		end -= 1;
+	}
+	a_Location->setFileName(QString::fromUtf8(a_Line + end + 1, fileNameEnd - end));
+	if (end - 1 <= idx)
+	{
+		return;
+	}
+	end -= 1;
+	if (a_Line[end] == ' ')
+	{
+		end -= 1;
+	}
+	if (end > idx)
+	{
+		a_Location->setFunctionName(QString::fromUtf8(a_Line + idx, end - idx + 1));
+	}
+	return;
 }
 
 

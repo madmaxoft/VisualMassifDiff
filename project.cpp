@@ -9,12 +9,14 @@
 #include "globals.h"
 #include "project.h"
 #include "snapshot.h"
+#include "codelocationfactory.h"
 
 
 
 
 
-Project::Project()
+Project::Project():
+	m_CodeLocationFactory(std::make_shared<CodeLocationFactory>())
 {
 }
 

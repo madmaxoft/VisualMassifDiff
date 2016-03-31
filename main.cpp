@@ -20,6 +20,12 @@ int main(int argc, char *argv[])
 	MainWindow w;
 	w.show();
 
+	// Any cmd-line parameters are interpreted as filenames to open:
+	for (int i = 1; i < argc; i++)
+	{
+		w.addSnapshotsFromFile(QString::fromUtf8(argv[i]));
+	}
+
 	return a.exec();
 }
 
