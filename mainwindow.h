@@ -10,6 +10,7 @@
 
 
 #include <memory>
+#include <list>
 #include <QMainWindow>
 
 
@@ -21,6 +22,7 @@ class Project;
 typedef std::shared_ptr<Project> ProjectPtr;
 class Snapshot;
 typedef std::shared_ptr<Snapshot>SnapshotPtr;
+typedef std::list<SnapshotPtr> SnapshotPtrs;
 class QTreeWidgetItem;
 
 
@@ -73,8 +75,17 @@ public slots:
 	/** Triggered when a snapshot is double-clicked in the treeview. */
 	void twItemDblClicked(QTreeWidgetItem * a_Item, int a_Column);
 
+	/** Triggered when the selection in twSnapshots changes. */
+	void twItemSelChanged();
+
 	/** Opens a snapshot details window for the specified snapshot. */
 	void viewSnapshotDetails(SnapshotPtr a_Snapshot);
+
+	/** Creates a diff between the selected snapshots and shows it in a separate dialog. */
+	void diffSelected();
+
+	/** Creates a diff between all snapshots and shows it in a separate dialog. */
+	void diffAll();
 
 private:
 
@@ -92,6 +103,8 @@ private:
 	The item is not inserted into any treewidget. */
 	QTreeWidgetItem * createSnapshotTreeItem(SnapshotPtr a_Snapshot);
 
+	/** Displays a new DlgSnapshotDiffs for diffs created between the specified snapshots. */
+	void showDiffsForSnapshots(const SnapshotPtrs & a_Snapshots);
 };
 
 

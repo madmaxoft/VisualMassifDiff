@@ -20,6 +20,8 @@
 #include "snapshot.h"
 #include "dlgsnapshotdetails.h"
 #include "formatnumber.h"
+#include "snapshotdiff.h"
+#include "dlgsnapshotdiffs.h"
 
 
 
@@ -39,13 +41,20 @@ MainWindow::MainWindow(QWidget * parent):
 {
 	m_UI->setupUi(this);
 
+	// Add a context menu to twSnapshots:
+	m_UI->twSnapshots->addAction(m_UI->actCtxDiffSelected);
+	m_UI->twSnapshots->addAction(m_UI->actCtxDiffAll);
+
 	// Create a new empty project:
 	m_Project = std::make_shared<Project>();
 	m_UI->graph->setProject(m_Project);
 
 	// Connect the UI signals / slots:
-	connect(m_UI->actSnapshotsAdd, SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
-	connect(m_UI->twSnapshots,     SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(twItemDblClicked(QTreeWidgetItem *, int)));
+	connect(m_UI->actSnapshotsAdd,    SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
+	connect(m_UI->twSnapshots,        SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(twItemDblClicked(QTreeWidgetItem *, int)));
+	connect(m_UI->twSnapshots,        SIGNAL(itemSelectionChanged()),                    this, SLOT(twItemSelChanged()));
+	connect(m_UI->actCtxDiffSelected, SIGNAL(triggered()),                               this, SLOT(diffSelected()));
+	connect(m_UI->actCtxDiffAll,      SIGNAL(triggered()),                               this, SLOT(diffAll()));
 }
 
 
@@ -197,10 +206,47 @@ void MainWindow::twItemDblClicked(QTreeWidgetItem * a_Item, int a_Column)
 
 
 
+void MainWindow::twItemSelChanged()
+{
+	m_UI->actCtxDiffSelected->setEnabled(m_UI->twSnapshots->selectedItems().size() > 1);
+}
+
+
+
+
+
 void MainWindow::viewSnapshotDetails(SnapshotPtr a_Snapshot)
 {
 	auto dlg = new DlgSnapshotDetails;
 	dlg->show(a_Snapshot);
+}
+
+
+
+
+
+void MainWindow::diffSelected()
+{
+	// Collect all selected snapshots:
+	SnapshotPtrs snapshots;
+	// foreach(item, m_UI->twSnapshots->selectedItems())
+	for (auto item: m_UI->twSnapshots->selectedItems())
+	{
+		auto timestamp = item->data(0, TW_ITEM_DATAROLE_SNAPSHOT_TIMESTAMP);
+		auto snapshot = m_Project->getSnapshotAtTimestamp(timestamp.toULongLong());
+		snapshots.push_back(snapshot);
+	}
+
+	showDiffsForSnapshots(snapshots);
+}
+
+
+
+
+
+void MainWindow::diffAll()
+{
+	showDiffsForSnapshots(m_Project->getSnapshots());
 }
 
 
@@ -223,6 +269,38 @@ QTreeWidgetItem * MainWindow::createSnapshotTreeItem(SnapshotPtr a_Snapshot)
 		res->setIcon(0, m_IcoAllocations);
 	}
 	return res;
+}
+
+
+
+
+
+void MainWindow::showDiffsForSnapshots(const SnapshotPtrs & a_Snapshots)
+{
+	// Sort the snapshots by their timestamp:
+	SnapshotPtrs snapshots(a_Snapshots);
+	snapshots.sort([](SnapshotPtr a_First, SnapshotPtr a_Second)
+		{
+			return (a_First->getTimestamp() < a_Second->getTimestamp());
+		}
+	);
+
+	// Create the diffs:
+	SnapshotDiffPtrs diffs;
+	SnapshotPtr prevSnapshot;
+	for (auto s: snapshots)
+	{
+		if (prevSnapshot != nullptr)
+		{
+			auto diff = std::make_shared<SnapshotDiff>(prevSnapshot, s);
+			diffs.push_back(diff);
+		}
+		prevSnapshot = s;
+	}
+
+	// Show the diffs:
+	auto dlg = new DlgSnapshotDiffs(this);
+	dlg->show(std::move(diffs));
 }
 
 

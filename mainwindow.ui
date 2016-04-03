@@ -54,6 +54,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::ActionsContextMenu</enum>
+       </property>
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
@@ -188,6 +191,16 @@
   <action name="actSnapshotsExportAll">
    <property name="text">
     <string>&amp;Export all...</string>
+   </property>
+  </action>
+  <action name="actCtxDiffSelected">
+   <property name="text">
+    <string>Diff selected...</string>
+   </property>
+  </action>
+  <action name="actCtxDiffAll">
+   <property name="text">
+    <string>Diff all</string>
    </property>
   </action>
  </widget>

@@ -93,7 +93,7 @@ void DlgSnapshotDetails::insertChildAllocations(QTreeWidgetItem * a_TreeItem, Al
 			columns << tr("%1").arg(ch->getFileLineNum());
 		}
 		auto twi = new QTreeWidgetItem(columns);
-		twi->setData(0, TW_ITEM_DATAROLE_ALLOCATIONPTR, reinterpret_cast<uintptr_t>(ch.get()));
+		twi->setData(0, TW_ITEM_DATAROLE_ALLOCATIONPTR, reinterpret_cast<qulonglong>(ch.get()));
 		twi->setTextAlignment(0, Qt::AlignRight | Qt::AlignVCenter);
 		twi->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
 		twi->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);

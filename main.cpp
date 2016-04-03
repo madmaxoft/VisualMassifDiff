@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 	MainWindow w;
-	w.show();
+	w.showMaximized();
 
 	// Any cmd-line parameters are interpreted as filenames to open:
 	for (int i = 1; i < argc; i++)

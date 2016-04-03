@@ -24,7 +24,10 @@ SOURCES += \
 	formatnumber.cpp \
 	snapshotsgraph.cpp \
 	codelocation.cpp \
-	codelocationfactory.cpp
+	codelocationfactory.cpp \
+	snapshotdiff.cpp \
+	dlgsnapshotdiffs.cpp \
+	snapshotdiffmodel.cpp
 
 HEADERS  += \
 	mainwindow.h \
@@ -39,11 +42,15 @@ HEADERS  += \
 	globals.h \
 	snapshotsgraph.h \
 	codelocation.h \
-	codelocationfactory.h
+	codelocationfactory.h \
+	snapshotdiff.h \
+	dlgsnapshotdiffs.h \
+	snapshotdiffmodel.h
 
 FORMS += \
 	mainwindow.ui \
-	dlgsnapshotdetails.ui
+	dlgsnapshotdetails.ui \
+	dlgsnapshotdiffs.ui
 
 OTHER_FILES += \
 	.gitignore \

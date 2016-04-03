@@ -37,9 +37,39 @@ QString formatBigNumber(quint64 a_Number)
 
 
 
+QString formatBigSignedNumber(qint64 a_Number)
+{
+	if (a_Number >= 0)
+	{
+		return formatBigNumber(static_cast<quint64>(a_Number));
+	}
+	else
+	{
+		return QString("-") + formatBigNumber(static_cast<quint64>(-a_Number));
+	}
+}
+
+
+
+
+
 QString formatMemorySize(quint64 a_Size)
 {
 	return formatBigNumber((a_Size + 1023) / 1024);
+}
+
+
+
+
+
+QString formatSignedMemorySize(qint64 a_Size)
+{
+	if (a_Size >= 0)
+	{
+		return formatBigNumber(static_cast<quint64>((a_Size + 1023) / 1024));
+	}
+	a_Size = -a_Size;
+	return QString("-") + formatBigNumber(static_cast<quint64>((a_Size + 1023) / 1024));
 }
 
 

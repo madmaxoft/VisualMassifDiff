@@ -74,6 +74,10 @@ public:
 	/** Sorts the children (recursively) by their AllocationSize. */
 	void sortBySize();
 
+	/** Returns the immediate child that has the specified CodeLocation.
+	Returns nullptr if no such child. */
+	AllocationPtr findCodeLocationChild(CodeLocationPtr a_CodeLocation);
+
 protected:
 
 	/** The parent allocation, if any. */
