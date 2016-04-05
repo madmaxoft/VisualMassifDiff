@@ -18,3 +18,7 @@ CodeLocation::CodeLocation(quint64 a_Address):
 	m_FileLineNum(0)
 {
 }
+
+
+
+

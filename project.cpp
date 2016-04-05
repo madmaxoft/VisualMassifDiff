@@ -10,13 +10,15 @@
 #include "project.h"
 #include "snapshot.h"
 #include "codelocationfactory.h"
+#include "codelocationstats.h"
 
 
 
 
 
 Project::Project():
-	m_CodeLocationFactory(std::make_shared<CodeLocationFactory>())
+	m_CodeLocationFactory(std::make_shared<CodeLocationFactory>()),
+	m_CodeLocationStats(std::make_shared<CodeLocationStats>(this))
 {
 }
 
@@ -26,6 +28,9 @@ Project::Project():
 
 void Project::addSnapshot(SnapshotPtr a_Snapshot)
 {
+	// Update the stats:
+	m_CodeLocationStats->addingSnapshot(a_Snapshot.get());
+
 	// Insert the snapshot into the internal collection, so that it is sorted:
 	auto timestamp = a_Snapshot->getTimestamp();
 	for (auto itr = m_Snapshots.begin(), end = m_Snapshots.end(); itr != end; ++itr)

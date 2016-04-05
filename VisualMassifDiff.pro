@@ -27,7 +27,9 @@ SOURCES += \
 	codelocationfactory.cpp \
 	snapshotdiff.cpp \
 	dlgsnapshotdiffs.cpp \
-	snapshotdiffmodel.cpp
+	snapshotdiffmodel.cpp \
+	codelocationstats.cpp \
+	codelocationstatsmodel.cpp
 
 HEADERS  += \
 	mainwindow.h \
@@ -45,7 +47,9 @@ HEADERS  += \
 	codelocationfactory.h \
 	snapshotdiff.h \
 	dlgsnapshotdiffs.h \
-	snapshotdiffmodel.h
+	snapshotdiffmodel.h \
+	codelocationstats.h \
+	codelocationstatsmodel.h
 
 FORMS += \
 	mainwindow.ui \

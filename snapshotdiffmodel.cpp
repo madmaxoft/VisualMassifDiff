@@ -42,7 +42,7 @@ QVariant SnapshotDiffModel::data(const QModelIndex & a_Index, int a_Role) const
 				case 0: return formatBigSignedNumber(di->getHeapSizeDiff());
 				case 1: return di->getCodeLocation()->getFunctionName();
 				case 2: return di->getCodeLocation()->getFileName();
-				case 3: return tr("%1").arg(di->getCodeLocation()->getFileLineNum());
+				case 3: return di->getCodeLocation()->getFileLineNum();
 			}
 			break;
 		}
@@ -72,7 +72,7 @@ Qt::ItemFlags SnapshotDiffModel::flags(const QModelIndex & a_Index) const
 		return 0;
 	}
 
-	return QAbstractItemModel::flags(a_Index);
+	return Super::flags(a_Index);
 }
 
 

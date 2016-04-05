@@ -22,6 +22,7 @@
 #include "formatnumber.h"
 #include "snapshotdiff.h"
 #include "dlgsnapshotdiffs.h"
+#include "codelocationstatsmodel.h"
 
 
 
@@ -48,6 +49,11 @@ MainWindow::MainWindow(QWidget * parent):
 	// Create a new empty project:
 	m_Project = std::make_shared<Project>();
 	m_UI->graph->setProject(m_Project);
+	m_CodeLocationStatsModel = std::make_shared<CodeLocationStatsModel>(m_Project);
+	m_CodeLocationStatsSortModel = std::make_shared<QSortFilterProxyModel>();
+	m_CodeLocationStatsSortModel->setSourceModel(m_CodeLocationStatsModel.get());
+	m_CodeLocationStatsSortModel->setSortRole(CodeLocationStatsModel::SortRole);
+	m_UI->tvCodeLocations->setModel(m_CodeLocationStatsSortModel.get());
 
 	// Connect the UI signals / slots:
 	connect(m_UI->actSnapshotsAdd,    SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
@@ -143,6 +149,7 @@ void MainWindow::newSnapshotParsed(SnapshotPtr a_Snapshot)
 	auto item = createSnapshotTreeItem(a_Snapshot);
 	m_UI->twSnapshots->addTopLevelItem(item);
 	m_UI->graph->projectChanged();
+	m_CodeLocationStatsModel->addedSnapshot();
 }
 
 

@@ -18,12 +18,14 @@
 
 
 // fwd:
+class QTreeWidgetItem;
+class QSortFilterProxyModel;
 class Project;
 typedef std::shared_ptr<Project> ProjectPtr;
 class Snapshot;
 typedef std::shared_ptr<Snapshot>SnapshotPtr;
 typedef std::list<SnapshotPtr> SnapshotPtrs;
-class QTreeWidgetItem;
+class CodeLocationStatsModel;
 
 
 
@@ -97,6 +99,12 @@ private:
 
 	/**Icon displayed in the tree view if the snapshot has detailed allocations attached to it.  */
 	QIcon m_IcoAllocations;
+
+	/** The basic model for CodeLocation stats. */
+	std::shared_ptr<CodeLocationStatsModel> m_CodeLocationStatsModel;
+
+	/** The sorting proxy model for CodeLocation stats. */
+	std::shared_ptr<QSortFilterProxyModel> m_CodeLocationStatsSortModel;
 
 
 	/** Creates a treeview item for the specified new snapshot.

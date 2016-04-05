@@ -27,6 +27,8 @@ typedef std::shared_ptr<Snapshot> SnapshotPtr;
 typedef std::list<SnapshotPtr> SnapshotPtrs;
 class CodeLocationFactory;
 typedef std::shared_ptr<CodeLocationFactory> CodeLocationFactoryPtr;
+class CodeLocationStats;
+typedef std::shared_ptr<CodeLocationStats> CodeLocationStatsPtr;
 
 
 
@@ -66,6 +68,10 @@ public:
 
 	CodeLocationFactoryPtr getCodeLocationFactory() { return m_CodeLocationFactory; }
 
+	/** Returns the code location stats calculator.
+	The instance keeps track of min, max and avg allocation sizes of each code location. */
+	CodeLocationStatsPtr getCodeLocationStats() { return m_CodeLocationStats; }
+
 protected:
 
 	/** The snapshots contained within the project. */
@@ -81,6 +87,10 @@ protected:
 	/** The time unit used when creating the Massif files for this project.
 	Used to check when adding new files that they come from the same Massif settings. */
 	std::string m_TimeUnit;
+
+	/** The code location stats calculator.
+	Keeps track of min, max and avg allocation sizes of each code location. */
+	CodeLocationStatsPtr m_CodeLocationStats;
 
 };
 
