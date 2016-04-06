@@ -78,6 +78,10 @@ public:
 	Returns nullptr if no such child. */
 	AllocationPtr findCodeLocationChild(CodeLocationPtr a_CodeLocation);
 
+	/** Returns the child (any depth descendant) that has the specified CodeLocation.
+	Returns nullptr if no such child. */
+	AllocationPtr recursiveFindCodeLocationChild(CodeLocation * a_CodeLocation);
+
 protected:
 
 	/** The parent allocation, if any. */

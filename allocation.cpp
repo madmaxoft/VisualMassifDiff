@@ -88,3 +88,24 @@ AllocationPtr Allocation::findCodeLocationChild(CodeLocationPtr a_CodeLocation)
 
 
 
+AllocationPtr Allocation::recursiveFindCodeLocationChild(CodeLocation * a_CodeLocation)
+{
+	if (m_CodeLocation.get() == a_CodeLocation)
+	{
+		return shared_from_this();
+	}
+	for (const auto & ch: m_Children)
+	{
+		auto res = ch->recursiveFindCodeLocationChild(a_CodeLocation);
+		if (res != nullptr)
+		{
+			return res;
+		}
+	}
+	return nullptr;
+}
+
+
+
+
+
