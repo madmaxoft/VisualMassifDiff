@@ -13,48 +13,48 @@ TEMPLATE = app
 
 
 SOURCES += \
-	main.cpp \
-	mainwindow.cpp \
-	project.cpp \
-	snapshot.cpp \
-	allocation.cpp \
-	massifparser.cpp \
-	dlgsnapshotdetails.cpp \
-	allocationsgraph.cpp \
-	formatnumber.cpp \
-	snapshotsgraph.cpp \
-	codelocation.cpp \
-	codelocationfactory.cpp \
-	snapshotdiff.cpp \
-	dlgsnapshotdiffs.cpp \
-	snapshotdiffmodel.cpp \
-	codelocationstats.cpp \
-	codelocationstatsmodel.cpp
+	Main.cpp \
+	MainWindow.cpp \
+	Project.cpp \
+	Snapshot.cpp \
+	Allocation.cpp \
+	MassifParser.cpp \
+	DlgSnapshotDetails.cpp \
+	AllocationsGraph.cpp \
+	FormatNumber.cpp \
+	SnapshotsGraph.cpp \
+	CodeLocation.cpp \
+	CodeLocationFactory.cpp \
+	SnapshotDiff.cpp \
+	DlgSnapshotDiffs.cpp \
+	SnapshotDiffModel.cpp \
+	CodelocationStats.cpp \
+	CodelocationStatsModel.cpp
 
 HEADERS  += \
-	mainwindow.h \
-	project.h \
-	snapshot.h \
-	allocation.h \
-	massifparser.h \
-	parseinteger.h \
-	dlgsnapshotdetails.h \
-	allocationsgraph.h \
-	formatnumber.h \
-	globals.h \
-	snapshotsgraph.h \
-	codelocation.h \
-	codelocationfactory.h \
-	snapshotdiff.h \
-	dlgsnapshotdiffs.h \
-	snapshotdiffmodel.h \
-	codelocationstats.h \
-	codelocationstatsmodel.h
+	Project.h \
+	Snapshot.h \
+	Allocation.h \
+	MassifParser.h \
+	ParseInteger.h \
+	DlgSnapshotDetails.h \
+	AllocationsGraph.h \
+	FormatNumber.h \
+	Globals.h \
+	SnapshotsGraph.h \
+	CodeLocation.h \
+	CodeLocationFactory.h \
+	SnapshotDiff.h \
+	DlgSnapshotDiffs.h \
+	SnapshotDiffModel.h \
+	CodeLocationStats.h \
+	CodeLocationStatsModel.h \
+	MainWindow.h
 
 FORMS += \
-	mainwindow.ui \
-	dlgsnapshotdetails.ui \
-	dlgsnapshotdiffs.ui
+	MainWindow.ui \
+	DlgSnapshotDetails.ui \
+	DlgSnapshotDiffs.ui
 
 OTHER_FILES += \
 	.gitignore \
