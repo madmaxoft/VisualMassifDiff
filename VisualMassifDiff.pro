@@ -29,7 +29,8 @@ SOURCES += \
 	DlgSnapshotDiffs.cpp \
 	SnapshotDiffModel.cpp \
 	CodelocationStats.cpp \
-	CodelocationStatsModel.cpp
+	CodelocationStatsModel.cpp \
+	AllocationPath.cpp
 
 HEADERS  += \
 	Project.h \
@@ -49,7 +50,8 @@ HEADERS  += \
 	SnapshotDiffModel.h \
 	CodeLocationStats.h \
 	CodeLocationStatsModel.h \
-	MainWindow.h
+	MainWindow.h \
+	AllocationPath.h
 
 FORMS += \
 	MainWindow.ui \

@@ -72,11 +72,11 @@ void Allocation::sortBySize()
 
 
 
-AllocationPtr Allocation::findCodeLocationChild(CodeLocationPtr a_CodeLocation)
+AllocationPtr Allocation::findCodeLocationChild(CodeLocation * a_CodeLocation)
 {
 	for (const auto & ch: m_Children)
 	{
-		if (ch->getCodeLocation() == a_CodeLocation)
+		if (ch->getCodeLocation().get() == a_CodeLocation)
 		{
 			return ch;
 		}

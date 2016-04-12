@@ -169,7 +169,7 @@ void SnapshotDiff::matchChildren(DiffItemPtr a_DiffItem)
 		{
 			continue;
 		}
-		auto match = secondAllocation->findCodeLocationChild(ch->getCodeLocation());
+		auto match = secondAllocation->findCodeLocationChild(ch->getCodeLocation().get());
 		auto di = a_DiffItem->addChild(ch, match);
 		if (match != nullptr)
 		{

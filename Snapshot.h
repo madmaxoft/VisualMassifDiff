@@ -24,6 +24,7 @@
 // fwd:
 class Allocation;
 typedef std::shared_ptr<Allocation> AllocationPtr;
+class AllocationPath;
 
 
 
@@ -50,6 +51,10 @@ public:
 	quint64 getHeapExtraSize() const { return m_HeapExtraSize; }
 	quint64 getTotalSize() const { return m_HeapSize + m_HeapExtraSize; }
 	AllocationPtr getRootAllocation() { return m_RootAllocation; }
+
+	/** Returns the allocation specified by its full path.
+	Returns nullptr if no such allocation in this snapshot. */
+	AllocationPtr findAllocation(const AllocationPath & a_Path) const;
 
 	/** Returns true if the snapshot has detailed allocations attached to it. */
 	bool hasAllocations() const { return (m_RootAllocation != nullptr); }
