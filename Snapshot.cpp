@@ -55,3 +55,37 @@ AllocationPtr Snapshot::findAllocation(const AllocationPath & a_Path) const
 
 
 
+
+void Snapshot::updateFlatSums()
+{
+	// Calculate the total and child sizes:
+	m_FlatSums.clear();
+	if (m_RootAllocation != nullptr)
+	{
+		addChildrenToFlatSums(m_RootAllocation);
+	}
+}
+
+
+
+
+
+void Snapshot::addChildrenToFlatSums(const AllocationPtr & a_Allocation)
+{
+	// Add to m_FlatSums, unless the code location is a nullptr:
+	auto codeLocation = a_Allocation->getCodeLocation().get();
+	if (codeLocation != nullptr)
+	{
+		m_FlatSums[codeLocation] += a_Allocation->getAllocationSize();
+	}
+	
+	// Recurse the children:
+	for (const auto & ch: a_Allocation->getChildren())
+	{
+		addChildrenToFlatSums(ch);
+	}
+}
+
+
+
+

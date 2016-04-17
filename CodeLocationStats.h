@@ -13,9 +13,10 @@
 
 
 
-#include <Qt>
 #include <map>
 #include <vector>
+#include <memory>
+#include <QObject>
 
 
 
@@ -25,6 +26,7 @@
 class CodeLocation;
 class Project;
 class Snapshot;
+typedef std::shared_ptr<Snapshot> SnapshotPtr;
 class Allocation;
 
 
@@ -32,8 +34,11 @@ class Allocation;
 
 
 
-class CodeLocationStats
+class CodeLocationStats:
+	public QObject
 {
+	Q_OBJECT
+
 public:
 
 	/** Represents the statistics for a single CodeLocation. */
@@ -58,11 +63,13 @@ public:
 	Returns nullptr if CodeLocation is not found. */
 	Stats * findStats(CodeLocation * a_CodeLocation);
 
-	/** Updates the stats based on the specified snapshot being added to project. */
-	void addingSnapshot(Snapshot * a_Snapshot);
-
 	/** Returns a copy of all the stats, transformed into a vector. */
 	std::vector<Stats> getAllStats();
+
+public slots:
+
+	/** Emitted by the underlying project just before a new snapshot is added. */
+	void onProjectAddingSnapshot(SnapshotPtr a_Snapshot);
 
 protected:
 

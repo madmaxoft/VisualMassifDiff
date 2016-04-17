@@ -23,6 +23,8 @@
 #include "SnapshotDiff.h"
 #include "DlgSnapshotDiffs.h"
 #include "CodeLocationStatsModel.h"
+#include "HistoryModel.h"
+#include "HistoryModelHierarchyDelegate.h"
 
 
 
@@ -48,12 +50,16 @@ MainWindow::MainWindow(QWidget * parent):
 
 	// Create a new empty project:
 	m_Project = std::make_shared<Project>();
-	m_UI->graph->setProject(m_Project);
 	m_CodeLocationStatsModel = std::make_shared<CodeLocationStatsModel>(m_Project);
 	m_CodeLocationStatsSortModel = std::make_shared<QSortFilterProxyModel>();
 	m_CodeLocationStatsSortModel->setSourceModel(m_CodeLocationStatsModel.get());
 	m_CodeLocationStatsSortModel->setSortRole(CodeLocationStatsModel::SortRole);
 	m_UI->tvCodeLocations->setModel(m_CodeLocationStatsSortModel.get());
+	m_HistoryModel = std::make_shared<HistoryModel>(m_Project);
+	m_UI->tvHistory->setModel(m_HistoryModel.get());
+	m_UI->tvHistory->setItemDelegateForColumn(5, new HistoryModelHierarchyDelegate(this));
+	// m_UI->tvHistory->setItemDelegateForColumn(6, new HistoryModelPositionDelegate(this));
+	m_UI->grHistory->setProject(m_Project, reinterpret_cast<HistoryModel *>(m_HistoryModel.get()));
 
 	// Connect the UI signals / slots:
 	connect(m_UI->actSnapshotsAdd,    SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
@@ -61,6 +67,11 @@ MainWindow::MainWindow(QWidget * parent):
 	connect(m_UI->twSnapshots,        SIGNAL(itemSelectionChanged()),                    this, SLOT(twItemSelChanged()));
 	connect(m_UI->actCtxDiffSelected, SIGNAL(triggered()),                               this, SLOT(diffSelected()));
 	connect(m_UI->actCtxDiffAll,      SIGNAL(triggered()),                               this, SLOT(diffAll()));
+
+	connect(m_UI->tvHistory, SIGNAL(collapsed(QModelIndex)), m_HistoryModel.get(), SLOT(collapseItem(QModelIndex)));
+	connect(m_UI->tvHistory, SIGNAL(expanded(QModelIndex)),  m_HistoryModel.get(), SLOT(expandItem(QModelIndex)));
+
+	connect(m_HistoryModel.get(), SIGNAL(modelDataChanged()), m_UI->grHistory, SLOT(projectDataChanged()));
 }
 
 
@@ -148,7 +159,6 @@ void MainWindow::newSnapshotParsed(SnapshotPtr a_Snapshot)
 	// Add snapshot to list:
 	auto item = createSnapshotTreeItem(a_Snapshot);
 	m_UI->twSnapshots->addTopLevelItem(item);
-	m_UI->graph->projectChanged();
 	m_CodeLocationStatsModel->addedSnapshot();
 }
 

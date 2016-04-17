@@ -15,7 +15,8 @@
 
 #include <memory>
 #include <list>
-#include <Qt>
+#include <QObject>
+#include "AllocationStats.h"
 
 
 
@@ -29,13 +30,17 @@ class CodeLocationFactory;
 typedef std::shared_ptr<CodeLocationFactory> CodeLocationFactoryPtr;
 class CodeLocationStats;
 typedef std::shared_ptr<CodeLocationStats> CodeLocationStatsPtr;
+class AllocationPath;
 
 
 
 
 
-class Project
+class Project:
+	public QObject
 {
+	Q_OBJECT
+
 public:
 	Project();
 
@@ -71,6 +76,20 @@ public:
 	/** Returns the code location stats calculator.
 	The instance keeps track of min, max and avg allocation sizes of each code location. */
 	CodeLocationStatsPtr getCodeLocationStats() { return m_CodeLocationStats; }
+
+	/** Returns the project-wide stats for the specified allocation path. */
+	AllocationStats getStatsForAllocationPath(const AllocationPath & a_AllocationPath);
+
+	/** Returns all paths across all snapshots that are immediate children to the specified path. */
+	std::vector<AllocationPath> getAllAllocationPathsImmediateChildren(const AllocationPath & a_Path);
+
+signals:
+
+	/** Emitted just before a snapshot is added to the project. */
+	void addingSnapshot(SnapshotPtr a_Snapshot);
+
+	/** Emitted just after a snapshot is added to the project. */
+	void addedSnapshot(SnapshotPtr a_Snapshot);
 
 protected:
 

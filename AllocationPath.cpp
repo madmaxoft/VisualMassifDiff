@@ -70,6 +70,20 @@ bool AllocationPath::operator ==(const AllocationPath & a_Other)
 
 
 
+AllocationPath & AllocationPath::operator =(const AllocationPath & a_Src)
+{
+	if (this == &a_Src)
+	{
+			return *this;
+	}
+	m_Segments = a_Src.m_Segments;
+	return *this;
+}
+
+
+
+
+
 AllocationPath AllocationPath::makeChild(CodeLocation * a_ChildCodeLocation) const
 {
 	AllocationPath res(*this);
@@ -90,6 +104,19 @@ AllocationPath AllocationPath::makeParent() const
 		res.m_Segments.pop_back();
 	}
 	return res;
+}
+
+
+
+
+
+CodeLocation * AllocationPath::getLeafSegment() const
+{
+	if (m_Segments.empty())
+	{
+		return nullptr;
+	}
+	return m_Segments.back();
 }
 
 

@@ -47,6 +47,10 @@ public:
 	/** Comparison to other instances. */
 	bool operator ==(const AllocationPath & a_Other);
 
+	/** Assignment operator.
+	gcc complains if this isn't defined. */
+	AllocationPath & operator =(const AllocationPath & a_Src);
+
 	/** Create a new path representing a child of this instance with the specified code location. */
 	AllocationPath makeChild(CodeLocation * a_ChildCodeLocation) const;
 
@@ -55,6 +59,9 @@ public:
 
 	/** Returns the individual segments of the path. */
 	const std::vector<CodeLocation *> getSegments() const { return m_Segments; }
+
+	/** Returns the last (leaf) segment of the path, or nullptr if path is empty. */
+	CodeLocation * getLeafSegment() const;
 
 protected:
 	/** The path to the allocation, using CodeLocation pointers from the root allocation.

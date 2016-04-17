@@ -32,3 +32,6 @@ Data/
 *.exe
 *.out
 *.app
+
+# Linux Build folder
+Build/

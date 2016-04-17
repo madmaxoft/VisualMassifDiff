@@ -24,6 +24,7 @@
 // fwd:
 class QTreeWidgetItem;
 class QSortFilterProxyModel;
+class QAbstractItemModel;
 class Project;
 typedef std::shared_ptr<Project> ProjectPtr;
 class Snapshot;
@@ -109,6 +110,9 @@ private:
 
 	/** The sorting proxy model for CodeLocation stats. */
 	std::shared_ptr<QSortFilterProxyModel> m_CodeLocationStatsSortModel;
+
+	/** The model used for the allocation history views. */
+	std::shared_ptr<QAbstractItemModel> m_HistoryModel;
 
 
 	/** Creates a treeview item for the specified new snapshot.

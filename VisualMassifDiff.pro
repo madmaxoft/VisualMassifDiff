@@ -22,7 +22,7 @@ SOURCES += \
 	DlgSnapshotDetails.cpp \
 	AllocationsGraph.cpp \
 	FormatNumber.cpp \
-	SnapshotsGraph.cpp \
+	HistoryGraph.cpp \
 	CodeLocation.cpp \
 	CodeLocationFactory.cpp \
 	SnapshotDiff.cpp \
@@ -30,7 +30,9 @@ SOURCES += \
 	SnapshotDiffModel.cpp \
 	CodelocationStats.cpp \
 	CodelocationStatsModel.cpp \
-	AllocationPath.cpp
+	AllocationPath.cpp \
+	HistoryModel.cpp \
+	HistoryModelHierarchyDelegate.cpp
 
 HEADERS  += \
 	Project.h \
@@ -42,7 +44,7 @@ HEADERS  += \
 	AllocationsGraph.h \
 	FormatNumber.h \
 	Globals.h \
-	SnapshotsGraph.h \
+	HistoryGraph.h \
 	CodeLocation.h \
 	CodeLocationFactory.h \
 	SnapshotDiff.h \
@@ -51,7 +53,10 @@ HEADERS  += \
 	CodeLocationStats.h \
 	CodeLocationStatsModel.h \
 	MainWindow.h \
-	AllocationPath.h
+	AllocationPath.h \
+	HistoryModel.h \
+	AllocationStats.h \
+	HistoryModelHierarchyDelegate.h
 
 FORMS += \
 	MainWindow.ui \

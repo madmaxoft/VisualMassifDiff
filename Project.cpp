@@ -8,9 +8,12 @@
 
 #include "Globals.h"
 #include "Project.h"
+#include <unordered_set>
 #include "Snapshot.h"
 #include "CodeLocationFactory.h"
 #include "CodeLocationStats.h"
+#include "AllocationPath.h"
+#include "Allocation.h"
 
 
 
@@ -28,8 +31,8 @@ Project::Project():
 
 void Project::addSnapshot(SnapshotPtr a_Snapshot)
 {
-	// Update the stats:
-	m_CodeLocationStats->addingSnapshot(a_Snapshot.get());
+	// Emit the signal about the change to all listeners:
+	emit addingSnapshot(a_Snapshot);
 
 	// Insert the snapshot into the internal collection, so that it is sorted:
 	auto timestamp = a_Snapshot->getTimestamp();
@@ -38,11 +41,13 @@ void Project::addSnapshot(SnapshotPtr a_Snapshot)
 		if ((*itr)->getTimestamp() > timestamp)
 		{
 			m_Snapshots.insert(itr, a_Snapshot);
+			emit addedSnapshot(a_Snapshot);
 			return;
 		}
 	}
 	// Timestamp is larger than anything in the collection, append to back:
 	m_Snapshots.push_back(a_Snapshot);
+	emit addedSnapshot(a_Snapshot);
 }
 
 
@@ -124,6 +129,54 @@ bool Project::checkAndSetTimeUnit(const char * a_TimeUnit)
 
 	// Snapshots are already present, check the stored time unit:
 	return (m_TimeUnit.compare(a_TimeUnit) == 0);
+}
+
+
+
+
+
+AllocationStats Project::getStatsForAllocationPath(const AllocationPath & a_AllocationPath)
+{
+	AllocationStats stats(a_AllocationPath);
+	for (const auto & s: m_Snapshots)
+	{
+		const auto alloc = s->findAllocation(a_AllocationPath);
+		auto size = (alloc == nullptr) ? 0 : alloc->getAllocationSize();
+		stats.processNewValue(size);
+	}
+	stats.finishProcessing(m_Snapshots.size());
+	return stats;
+}
+
+
+
+
+
+std::vector<AllocationPath> Project::getAllAllocationPathsImmediateChildren(const AllocationPath & a_Path)
+{
+	// Collect all children's CodeLocations:
+	std::unordered_set<CodeLocation *> childrenCodeLocations;
+	for (const auto & s: m_Snapshots)
+	{
+		const auto allocation = s->findAllocation(a_Path);
+		if (allocation == nullptr)
+		{
+			continue;
+		}
+		for (const auto & a: allocation->getChildren())
+		{
+			childrenCodeLocations.insert(a->getCodeLocation().get());
+		}
+	}
+
+	// Make the output by appending each child's CodeLocation to a_Path:
+	std::vector<AllocationPath> paths;
+	for (const auto & cl: childrenCodeLocations)
+	{
+		paths.emplace_back(a_Path.makeChild(cl));
+	}
+
+	return paths;
 }
 
 

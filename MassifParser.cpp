@@ -283,6 +283,7 @@ void MassifParser::endCurrentSnapshot(void)
 		{
 			allocation->sortBySize();
 		}
+		m_CurrentSnapshot->updateFlatSums();
 
 		// Notify about the new snapshot:
 		emit newSnapshotParsed(m_CurrentSnapshot);

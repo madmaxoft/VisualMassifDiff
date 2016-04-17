@@ -64,7 +64,7 @@ int CodeLocationStatsModel::rowCount(const QModelIndex & a_Parent) const
 
 int CodeLocationStatsModel::columnCount(const QModelIndex &) const
 {
-	return 7;
+	return 8;
 }
 
 
@@ -92,6 +92,7 @@ QVariant CodeLocationStatsModel::data(const QModelIndex & a_Index, int a_Role) c
 				case 4: return Qt::AlignRight;
 				case 5: return Qt::AlignRight;
 				case 6: return Qt::AlignRight;
+				case 7: return Qt::AlignRight;
 			}
 			break;
 		}  // case Qt::TextAlignmentRole
@@ -140,6 +141,7 @@ QVariant CodeLocationStatsModel::data(const QModelIndex & a_Index, int a_Role) c
 				case 4: return formatBigNumber(stat.m_MaxAllocationSize);
 				case 5: return formatBigNumber(stat.m_MinAllocationSize);
 				case 6: return formatBigNumber(stat.m_AvgAllocationSize);
+				case 7: return formatBigSignedNumber(stat.m_MaxAllocationSize - stat.m_MinAllocationSize);
 			}
 			break;
 		}  // case Qt::DisplayRole
@@ -183,6 +185,7 @@ QVariant CodeLocationStatsModel::data(const QModelIndex & a_Index, int a_Role) c
 				case 4: return stat.m_MaxAllocationSize;
 				case 5: return stat.m_MinAllocationSize;
 				case 6: return stat.m_AvgAllocationSize;
+				case 7: return stat.m_MaxAllocationSize - stat.m_MinAllocationSize;
 			}
 			break;
 		}
@@ -209,6 +212,7 @@ QVariant CodeLocationStatsModel::headerData(int a_Section, Qt::Orientation a_Ori
 		case 4: return tr("Max");
 		case 5: return tr("Min");
 		case 6: return tr("Avg");
+		case 7: return tr("Diff");
 	}
 	return QVariant();
 }

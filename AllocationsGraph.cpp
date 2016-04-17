@@ -1,6 +1,6 @@
 // AllocationsGraph.cpp
 
-// Implements the AllocationsGraph class representing a UI widget to display Allocation's children in a graph
+// Implements the AllocationsGraph class representing a UI widget to display Allocation's children in a pie chart
 
 
 

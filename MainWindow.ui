@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1182</width>
+    <width>1064</width>
     <height>729</height>
    </rect>
   </property>
@@ -40,34 +40,10 @@
         <string>Snapshots</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
         <item>
-         <widget class="QSplitter" name="splitter">
-          <property name="lineWidth">
-           <number>3</number>
-          </property>
-          <property name="midLineWidth">
-           <number>1</number>
-          </property>
+         <widget class="QSplitter" name="splitter_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="handleWidth">
-           <number>6</number>
-          </property>
-          <property name="childrenCollapsible">
-           <bool>false</bool>
           </property>
           <widget class="QTreeWidget" name="twSnapshots">
            <property name="sizePolicy">
@@ -122,13 +98,41 @@
             </property>
            </column>
           </widget>
-          <widget class="SnapshotsGraph" name="graph" native="true">
+          <widget class="QSplitter" name="splitter">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>4</horstretch>
-             <verstretch>0</verstretch>
+             <horstretch>1</horstretch>
+             <verstretch>6</verstretch>
             </sizepolicy>
            </property>
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <widget class="HistoryGraph" name="grHistory" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>5</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+           <widget class="QTreeView" name="tvHistory">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="uniformRowHeights">
+             <bool>true</bool>
+            </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
           </widget>
          </widget>
         </item>
@@ -156,6 +160,9 @@
           <property name="sortingEnabled">
            <bool>true</bool>
           </property>
+          <attribute name="headerStretchLastSection">
+           <bool>false</bool>
+          </attribute>
          </widget>
         </item>
        </layout>
@@ -169,8 +176,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1182</width>
-     <height>21</height>
+     <width>1064</width>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -259,9 +266,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>SnapshotsGraph</class>
+   <class>HistoryGraph</class>
    <extends>QWidget</extends>
-   <header>SnapshotsGraph.h</header>
+   <header>HistoryGraph.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

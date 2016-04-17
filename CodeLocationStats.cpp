@@ -25,7 +25,8 @@ decltype(CodeLocationStats::Stats::m_MinAllocationSize) CodeLocationStats::Stats
 CodeLocationStats::Stats::Stats():
 	m_MaxAllocationSize(unassignedMax),
 	m_MinAllocationSize(unassignedMin),
-	m_AvgAllocationSize(0)
+	m_AvgAllocationSize(0),
+	m_CodeLocation(nullptr)
 {
 }
 
@@ -39,6 +40,7 @@ CodeLocationStats::Stats::Stats():
 CodeLocationStats::CodeLocationStats(Project * a_Project):
 	m_Project(a_Project)
 {
+	connect(m_Project, SIGNAL(addingSnapshot(SnapshotPtr)), this, SLOT(onProjectAddingSnapshot(SnapshotPtr)));
 }
 
 
@@ -59,9 +61,26 @@ CodeLocationStats::Stats * CodeLocationStats::findStats(CodeLocation * a_CodeLoc
 
 
 
-void CodeLocationStats::addingSnapshot(Snapshot * a_Snapshot)
+void CodeLocationStats::onProjectAddingSnapshot(SnapshotPtr a_Snapshot)
 {
-	updateStatsByAllocation(a_Snapshot->getRootAllocation().get());
+	auto numSnapshots = m_Project->getNumSnapshots();
+	const auto & sums = a_Snapshot->getFlatSums();
+	for (const auto & sum: sums)
+	{
+		auto loc = sum.first;
+		auto allocationSize = sum.second;
+		auto & stats = m_Stats[loc];
+		stats.m_CodeLocation = loc;  // If the location wasn't present yet - an empty new one was created
+		if (stats.m_MaxAllocationSize < allocationSize)
+		{
+			stats.m_MaxAllocationSize = allocationSize;
+		}
+		if (stats.m_MinAllocationSize > allocationSize)
+		{
+			stats.m_MinAllocationSize = allocationSize;
+		}
+		stats.m_AvgAllocationSize = (stats.m_AvgAllocationSize * numSnapshots + allocationSize) / (numSnapshots + 1);
+	}  // for sum: sums[]
 }
 
 
@@ -89,7 +108,11 @@ void CodeLocationStats::updateStatsByAllocation(Allocation * a_Allocation)
 	{
 		auto loc = ch->getCodeLocation().get();
 		auto & stats = m_Stats[loc];
-		stats.m_CodeLocation = loc;
+		if (stats.m_CodeLocation != nullptr)
+		{
+			stats.m_CodeLocation = loc + 1;
+		}
+		stats.m_CodeLocation = loc;  // If the location wasn't present yet - a new one was created
 		auto s = ch->getAllocationSize();
 		if (stats.m_MaxAllocationSize < s)
 		{
@@ -100,6 +123,7 @@ void CodeLocationStats::updateStatsByAllocation(Allocation * a_Allocation)
 			stats.m_MinAllocationSize = s;
 		}
 		stats.m_AvgAllocationSize = (stats.m_AvgAllocationSize * numSnapshots + s) / (numSnapshots + 1);
+		updateStatsByAllocation(ch.get());
 	}
 }
 

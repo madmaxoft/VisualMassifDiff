@@ -1,4 +1,4 @@
-// SnapshotsGraph.h
+// HistoryGraph.h
 
 // Declares the SnapshotsGraph class representing a UI widget that displays the allocation history of several snapshots
 
@@ -25,12 +25,14 @@ class Project;
 typedef std::shared_ptr<Project> ProjectPtr;
 class CodeLocation;
 class Snapshot;
+class HistoryModel;
+typedef std::shared_ptr<HistoryModel> HistoryModelPtr;
 
 
 
 
 
-class SnapshotsGraph:
+class HistoryGraph:
 	public QWidget
 {
 	typedef QWidget Super;
@@ -39,17 +41,17 @@ class SnapshotsGraph:
 
 public:
 
-	explicit SnapshotsGraph(QWidget * a_Parent = nullptr);
+	explicit HistoryGraph(QWidget * a_Parent = nullptr);
 
 	/** Sets the project whose snapshots are to be displayed. */
-	void setProject(ProjectPtr a_Project);
+	void setProject(ProjectPtr a_Project, HistoryModel * a_Model);
 
 signals:
 
 public slots:
 
-	/** Called when the project has changed and the display should be recalculated. */
-	void projectChanged();
+	/** Called when the project data has changed and the display should be recalculated. */
+	void projectDataChanged();
 
 protected:
 
@@ -83,22 +85,15 @@ protected:
 	/** Height of the widget's paint area, used for projection. */
 	int m_Height;
 
-	/** The CodeLocation instances that are graphed, along with the main memory usage.
-	Selected in selectCodeLocations(), updated each time a new snapshot is added. */
-	std::vector<CodeLocation *> m_GraphedCodeLocations;
+	/** The model that provides the graphed data. */
+	HistoryModel * m_Model;
 
-
-	/** Selects which CodeLocation instances should be graphed, into m_GraphedCodeLocations. */
-	void selectCodeLocations();
 
 	/** Updates the internal variables needed for correct projection of X and Y values. */
 	void updateProjection();
 
 	// QWidget overrides:
 	virtual void paintEvent(QPaintEvent * a_PaintEvent) override;
-
-	/** Paints the legend part of the widget at the bottom of the rect [0, 0, m_Width, m_Height]. */
-	void paintLegend(QPainter & a_Painter);
 
 	/** Paints the graph part of the widget, into the rect [0, 0, m_Width, m_Height]. */
 	void paintGraph(QPainter & a_Painter);
@@ -110,9 +105,9 @@ protected:
 	int projectionY(quint64 a_ValueY);
 
 	/** Projects the m_GraphedCodeLocations[] values into graph Y coordinates.
-	a_OutCoords is a pointer to an array of MaxCodeLocations elements that receives the Y coords.
+	a_OutCoords is an array that receives the Y coords.
 	The code locations' sizes are accumulated on top of each other. */
-	void projectCodeLocationsY(Snapshot * a_Snapshot, int * a_OutCoords);
+	void projectCodeLocationsY(Snapshot * a_Snapshot, std::vector<int> & a_OutCoords);
 };
 
 
