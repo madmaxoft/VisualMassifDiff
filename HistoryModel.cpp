@@ -84,6 +84,55 @@ HistoryModel::HistoryModel(ProjectPtr a_Project):
 
 
 
+bool HistoryModel::canItemExpand(const QModelIndex & a_Index) const
+{
+	if (!isValidIndex(a_Index))
+	{
+		return false;
+	}
+	auto gap = m_GraphedAllocationPaths[a_Index.row()];
+	if (gap == nullptr)
+	{
+		return false;
+	}
+	auto path = gap->m_AllocationPath;
+	for(;;)
+	{
+		const auto & children = m_Project->getAllAllocationPathsImmediateChildren(path);
+		if (children.empty())
+		{
+			return false;
+		}
+		if (children.size() > 1)
+		{
+			return true;
+		}
+		path = children[0];
+	}
+}
+
+
+
+
+
+bool HistoryModel::isValidIndex(const QModelIndex & a_Index) const
+{
+	if ((a_Index.row() < 0) || (a_Index.row() >= static_cast<int>(m_GraphedAllocationPaths.size())))
+	{
+		return false;
+	}
+	if ((a_Index.column() < 0) || (a_Index.column() > colMax))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+
+
+
 void HistoryModel::resetModel()
 {
 	beginResetModel();

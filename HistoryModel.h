@@ -88,6 +88,12 @@ public:
 	/** Returns all the allocation paths that are to be graphed. */
 	const std::vector<GraphedAllocationPathPtr> & getGraphedAllocationPaths() const { return m_GraphedAllocationPaths; }
 
+	/** Returns true iff the path at the specified index can expand (has at least two children somewhere down its hierarchy). */
+	bool canItemExpand(const QModelIndex & a_Index) const;
+
+	/** Returns true if the index is valid, in regard to row / column dimensions of the model. */
+	bool isValidIndex(const QModelIndex & a_Index) const;
+
 signals:
 
 	/** Emitted after the model has expanded or collapsed a path, or a path's position changed. */

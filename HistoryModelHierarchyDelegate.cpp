@@ -32,7 +32,7 @@ void HistoryModelHierarchyDelegate::paint(
 {
 	QStyleOptionButton button;
 	button.rect = a_Option.rect;
-	button.state = QStyle::State_Enabled;
+	button.state = 0;
 	if (m_CurrentIndex == a_Index)
 	{
 		button.state = QStyle::State_Sunken;
@@ -40,6 +40,11 @@ void HistoryModelHierarchyDelegate::paint(
 	else
 	{
 		button.state |= QStyle::State_Raised;
+	}
+	auto model = (reinterpret_cast<const HistoryModel *>(a_Index.model()));
+	if (model->canItemExpand(a_Index))
+	{
+		button.state |= QStyle::State_Enabled;
 	}
 	button.text = tr("Expand");
 	QApplication::style()->drawControl(QStyle::CE_PushButton, &button, a_Painter);
@@ -50,9 +55,9 @@ void HistoryModelHierarchyDelegate::paint(
 
 
 
-QSize HistoryModelHierarchyDelegate::sizeHint(const QStyleOptionViewItem & a_Option, const QModelIndex & a_Index) const
+QSize HistoryModelHierarchyDelegate::sizeHint(const QStyleOptionViewItem &, const QModelIndex &) const
 {
-	// TODO
+	// We don't have a size hint
 	return QSize(1, 1);
 }
 
@@ -72,7 +77,11 @@ bool HistoryModelHierarchyDelegate::editorEvent(QEvent * a_Event, QAbstractItemM
 		case QEvent::MouseButtonRelease:
 		{
 			m_CurrentIndex = QModelIndex();
-			(reinterpret_cast<HistoryModel *>(a_Model))->expandItem(a_Index);
+			auto model = reinterpret_cast<HistoryModel *>(a_Model);
+			if (model->canItemExpand(a_Index))
+			{
+				model->expandItem(a_Index);
+			}
 			return true;
 		}
 		default: break;
