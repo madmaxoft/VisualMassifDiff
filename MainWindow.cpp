@@ -59,7 +59,11 @@ MainWindow::MainWindow(QWidget * parent):
 	m_UI->tvHistory->setModel(m_HistoryModel.get());
 	m_UI->tvHistory->setItemDelegateForColumn(5, new HistoryModelHierarchyDelegate(this));
 	// m_UI->tvHistory->setItemDelegateForColumn(6, new HistoryModelPositionDelegate(this));
-	m_UI->grHistory->setProject(m_Project, reinterpret_cast<HistoryModel *>(m_HistoryModel.get()));
+	m_UI->grHistory->setProject(
+		m_Project,
+		reinterpret_cast<HistoryModel *>(m_HistoryModel.get()),
+		m_UI->tvHistory->selectionModel()
+	);
 
 	// Connect the UI signals / slots:
 	connect(m_UI->actSnapshotsAdd,    SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));

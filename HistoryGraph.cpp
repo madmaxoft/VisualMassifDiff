@@ -10,34 +10,12 @@
 #include "HistoryGraph.h"
 #include <unordered_set>
 #include <QPainter>
+#include <QItemSelectionModel>
 #include "Project.h"
 #include "Snapshot.h"
 #include "CodeLocationStats.h"
 #include "Allocation.h"
 #include "HistoryModel.h"
-
-
-
-
-
-/** Maximum number of CodeLocations that are graphed together with the main memory stats. */
-static const size_t MaxCodeLocations = 10;
-
-/** Colors used by the CodeLocation graph. */
-static const QBrush colors[] =
-{
-	QColor(0xff, 0x00, 0x00),
-	QColor(0x00, 0xff, 0x00),
-	QColor(0x00, 0x00, 0xff),
-	QColor(0xff, 0xff, 0x00),
-	QColor(0x00, 0xff, 0xff),
-	QColor(0xff, 0x00, 0xff),
-	QColor(0x7f, 0x00, 0x00),
-	QColor(0x00, 0x7f, 0x00),
-	QColor(0x7f, 0x7f, 0x00),
-	QColor(0x00, 0x7f, 0x7f),
-	QColor(0x7f, 0x00, 0x7f),
-};
 
 
 
@@ -52,10 +30,12 @@ HistoryGraph::HistoryGraph(QWidget * a_Parent):
 
 
 
-void HistoryGraph::setProject(ProjectPtr a_Project, HistoryModel * a_Model)
+void HistoryGraph::setProject(ProjectPtr a_Project, HistoryModel * a_Model, QItemSelectionModel * a_Selection)
 {
 	m_Project = a_Project;
 	m_Model = a_Model;
+	m_Selection = a_Selection;
+	connect(m_Selection, SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(selectionChanged()));
 	projectDataChanged();
 }
 
@@ -66,6 +46,15 @@ void HistoryGraph::setProject(ProjectPtr a_Project, HistoryModel * a_Model)
 void HistoryGraph::projectDataChanged()
 {
 	updateProjection();
+	repaint();
+}
+
+
+
+
+
+void HistoryGraph::selectionChanged()
+{
 	repaint();
 }
 
@@ -152,6 +141,12 @@ void HistoryGraph::paintGraph(QPainter & a_Painter)
 	prevY.resize(numGraphedItems);
 	y.resize(numGraphedItems);
 	projectCodeLocationsY(snapshots.front().get(), prevY);
+	std::vector<bool> isSelected;
+	isSelected.resize(numGraphedItems);
+	for (const auto & s: m_Selection->selectedIndexes())
+	{
+		isSelected[s.row()] = true;
+	}
 	for (const auto & s: snapshots)
 	{
 		int x = projectionX(s->getTimestamp());
@@ -170,13 +165,13 @@ void HistoryGraph::paintGraph(QPainter & a_Painter)
 			QPoint(x, 0),
 			QPoint(x, 0),
 		};
-		for (size_t i = 1; i < numGraphedItems; i++)
+		for (size_t i = 0; i < numGraphedItems; i++)
 		{
 			points[0].setY(prevTop);
 			points[1].setY(prevY[i]);
 			points[2].setY(y[i]);
 			points[3].setY(top);
-			a_Painter.setBrush(graphedItems[i - 1]->m_Color);
+			a_Painter.setBrush(QBrush(graphedItems[i]->m_Color, isSelected[i] ? Qt::DiagCrossPattern : Qt::SolidPattern));
 			a_Painter.drawConvexPolygon(points, 4);
 			top = y[i];
 			prevTop = prevY[i];

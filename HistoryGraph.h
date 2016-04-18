@@ -21,6 +21,7 @@
 
 
 // fwd:
+class QItemSelectionModel;
 class Project;
 typedef std::shared_ptr<Project> ProjectPtr;
 class CodeLocation;
@@ -44,7 +45,7 @@ public:
 	explicit HistoryGraph(QWidget * a_Parent = nullptr);
 
 	/** Sets the project whose snapshots are to be displayed. */
-	void setProject(ProjectPtr a_Project, HistoryModel * a_Model);
+	void setProject(ProjectPtr a_Project, HistoryModel * a_Model, QItemSelectionModel * a_Selection);
 
 signals:
 
@@ -52,6 +53,9 @@ public slots:
 
 	/** Called when the project data has changed and the display should be recalculated. */
 	void projectDataChanged();
+
+	/** Called when the selection of the project data has changed and the display should redraw. */
+	void selectionChanged();
 
 protected:
 
@@ -87,6 +91,9 @@ protected:
 
 	/** The model that provides the graphed data. */
 	HistoryModel * m_Model;
+
+	/** The selection that is used to display the highlights. */
+	QItemSelectionModel * m_Selection;
 
 
 	/** Updates the internal variables needed for correct projection of X and Y values. */
