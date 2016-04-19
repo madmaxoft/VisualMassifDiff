@@ -115,6 +115,25 @@ bool HistoryModel::canItemExpand(const QModelIndex & a_Index) const
 
 
 
+bool HistoryModel::canItemCollapse(const QModelIndex & a_Index) const
+{
+	if (!isValidIndex(a_Index))
+	{
+		return false;
+	}
+	auto gap = m_GraphedAllocationPaths[a_Index.row()];
+	if (gap == nullptr)
+	{
+		return false;
+	}
+	const auto & path = gap->m_AllocationPath;
+	return (path.getSegments().size() > 1);  // At least two segments
+}
+
+
+
+
+
 bool HistoryModel::isValidIndex(const QModelIndex & a_Index) const
 {
 	if ((a_Index.row() < 0) || (a_Index.row() >= static_cast<int>(m_GraphedAllocationPaths.size())))
@@ -161,7 +180,51 @@ void HistoryModel::expandItem(const QModelIndex & a_Item)
 
 void HistoryModel::collapseItem(const QModelIndex & a_Item)
 {
-	// TODO
+	if (!isValidIndex(a_Item))
+	{
+		return;
+	}
+	auto gap = m_GraphedAllocationPaths[a_Item.row()];
+	auto parentPath = gap->m_AllocationPath.makeParent();
+
+	// Change current item into its parent:
+	gap->m_AllocationPath = parentPath;
+	gap->m_Stats = m_Project->getStatsForAllocationPath(parentPath);
+
+	// Remove all children of the parent:
+	auto numGraphedAllocationPaths = m_GraphedAllocationPaths.size();
+	bool wasLastDeleted = false;
+	int lastDeletionStart = 0;
+	for (int i = static_cast<int>(numGraphedAllocationPaths) - 1; i >= 0; --i)
+	{
+		if (m_GraphedAllocationPaths[i]->m_AllocationPath.isChildPathOf(parentPath))
+		{
+			// The item should be deleted
+			if (!wasLastDeleted)
+			{
+				lastDeletionStart = i;
+				wasLastDeleted = true;
+			}
+		}
+		else
+		{
+			// The item shouldn't be deleted. If we've been queueing items up for deletion until now, delete them:
+			if (wasLastDeleted)
+			{
+				beginRemoveRows(QModelIndex(), i + 1, lastDeletionStart);
+				m_GraphedAllocationPaths.erase(m_GraphedAllocationPaths.begin() + i + 1, m_GraphedAllocationPaths.begin() + lastDeletionStart + 1);
+				endRemoveRows();
+				wasLastDeleted = false;
+			}
+		}
+	}  // for i - m_GraphedAllocationPaths[]
+	if (wasLastDeleted)
+	{
+		beginRemoveRows(QModelIndex(), 0, lastDeletionStart);
+		m_GraphedAllocationPaths.erase(m_GraphedAllocationPaths.begin(), m_GraphedAllocationPaths.begin() + lastDeletionStart + 1);
+		endRemoveRows();
+	}
+	emit modelDataChanged();
 }
 
 

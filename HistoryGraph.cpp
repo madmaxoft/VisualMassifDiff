@@ -221,6 +221,7 @@ void HistoryGraph::projectCodeLocationsY(Snapshot * a_Snapshot, std::vector<int>
 		}
 		a_OutCoords[idx] = projectionY(acc);
 	}
+	assert(acc == a_Snapshot->getHeapSize());
 }
 
 

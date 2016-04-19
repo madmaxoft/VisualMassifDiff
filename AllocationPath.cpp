@@ -123,3 +123,26 @@ CodeLocation * AllocationPath::getLeafSegment() const
 
 
 
+bool AllocationPath::isChildPathOf(const AllocationPath & a_Parent)
+{
+	// If it has less segments than the parent, it's definitely not a child:
+	if (m_Segments.size() <= a_Parent.m_Segments.size())
+	{
+		return false;
+	}
+
+	// Check all parent's segments if they are the same as ours:
+	for (size_t i = 0; i < a_Parent.m_Segments.size(); ++i)
+	{
+		if (m_Segments[i] != a_Parent.m_Segments[i])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+
+

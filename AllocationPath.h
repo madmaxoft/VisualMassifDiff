@@ -63,6 +63,9 @@ public:
 	/** Returns the last (leaf) segment of the path, or nullptr if path is empty. */
 	CodeLocation * getLeafSegment() const;
 
+	/** Returns true iff this path is a child of the specified parent path. */
+	bool isChildPathOf(const AllocationPath & a_Parent);
+
 protected:
 	/** The path to the allocation, using CodeLocation pointers from the root allocation.
 	[0] is the code location of the root allocation's child, etc. */

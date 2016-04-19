@@ -39,6 +39,14 @@ protected:
 	Empty index when mouse button is released. */
 	QModelIndex m_CurrentIndex;
 
+	/** The button on which the last MouseDown event occured. */
+	enum
+	{
+		mdbNone,      ///< Not on any button
+		mdbExpand,    ///< On the Expand button
+		mdbCollapse,  ///< On the Collapse button
+	} m_MouseDownButton;
+
 
 	virtual void paint(
 		QPainter * a_Painter,
@@ -58,6 +66,20 @@ protected:
 		const QModelIndex & a_Index
 	) override;
 
+
+	/** Returns the bounding box of the Expand button. */
+	QRect getExpandButtonRect(const QStyleOptionViewItem & a_Option) const;
+
+	/** Returns the bounding box of the Collapse button. */
+	QRect getCollapseButtonRect(const QStyleOptionViewItem & a_Option) const;
 };
 
+
+
+
+
 #endif // HISTORYMODELDELEGATE_H
+
+
+
+
