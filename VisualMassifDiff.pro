@@ -28,8 +28,8 @@ SOURCES += \
 	SnapshotDiff.cpp \
 	DlgSnapshotDiffs.cpp \
 	SnapshotDiffModel.cpp \
-	CodelocationStats.cpp \
-	CodelocationStatsModel.cpp \
+	CodeLocationStats.cpp \
+	CodeLocationStatsModel.cpp \
 	AllocationPath.cpp \
 	HistoryModel.cpp \
 	HistoryModelHierarchyDelegate.cpp
@@ -68,7 +68,7 @@ OTHER_FILES += \
 	README.md
 
 RESOURCES += \
-	VisualMassifDiff.qrc
+	res/VisualMassifDiff.qrc
 
 CONFIG += C++11
 
