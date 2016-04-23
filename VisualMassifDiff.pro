@@ -32,7 +32,9 @@ SOURCES += \
 	CodeLocationStatsModel.cpp \
 	AllocationPath.cpp \
 	HistoryModel.cpp \
-	HistoryModelHierarchyDelegate.cpp
+	HistoryModelHierarchyDelegate.cpp \
+	BinaryIOStream.cpp \
+	ProjectSaver.cpp
 
 HEADERS  += \
 	Project.h \
@@ -56,7 +58,9 @@ HEADERS  += \
 	AllocationPath.h \
 	HistoryModel.h \
 	AllocationStats.h \
-	HistoryModelHierarchyDelegate.h
+	HistoryModelHierarchyDelegate.h \
+	BinaryIOStream.h \
+	ProjectSaver.h
 
 FORMS += \
 	MainWindow.ui \

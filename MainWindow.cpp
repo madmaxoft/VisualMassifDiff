@@ -66,6 +66,8 @@ MainWindow::MainWindow(QWidget * parent):
 	);
 
 	// Connect the UI signals / slots:
+	connect(m_UI->actProjectSave,     SIGNAL(triggered()),                               this, SLOT(saveProject()));
+	connect(m_UI->actProjectSaveAs,   SIGNAL(triggered()),                               this, SLOT(saveProjectAs()));
 	connect(m_UI->actSnapshotsAdd,    SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
 	connect(m_UI->twSnapshots,        SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(twItemDblClicked(QTreeWidgetItem *, int)));
 	connect(m_UI->twSnapshots,        SIGNAL(itemSelectionChanged()),                    this, SLOT(twItemSelChanged()));
@@ -268,6 +270,43 @@ void MainWindow::diffSelected()
 void MainWindow::diffAll()
 {
 	showDiffsForSnapshots(m_Project->getSnapshots());
+}
+
+
+
+
+
+void MainWindow::saveProject()
+{
+	if (m_Project->getFileName().isEmpty())
+	{
+		emit saveProjectAs();
+		return;
+	}
+	emit saveProject(m_Project->getFileName());
+}
+
+
+
+
+
+void MainWindow::saveProject(const QString & a_FileName)
+{
+	m_Project->save(a_FileName);
+}
+
+
+
+
+
+void MainWindow::saveProjectAs()
+{
+	auto fileName = QFileDialog::getSaveFileName(nullptr, tr("Save the project file"), QString(), tr("VisualMassifDiff project file (*.vmdp)"));
+	if (fileName.isEmpty())
+	{
+		return;
+	}
+	emit saveProject(fileName);
 }
 
 

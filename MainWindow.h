@@ -94,6 +94,16 @@ public slots:
 	/** Creates a diff between all snapshots and shows it in a separate dialog. */
 	void diffAll();
 
+	/** Saves the project to the file it was read from / saved to last.
+	If the project has no filename attached yet, uses the SaveFile dialog to let the user choose. */
+	void saveProject();
+
+	/** Saves the project into the specified file. */
+	void saveProject(const QString & a_FileName);
+
+	/** Asks the user to select a file name, then saves the project to that file. */
+	void saveProjectAs();
+
 private:
 
 	/** UI, managed by QTCreator */

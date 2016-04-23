@@ -35,6 +35,10 @@ to query a history of allocations for a given CodeLocation. */
 class CodeLocationFactory
 {
 public:
+	/** The type used for storing the CodeLocation instances with a fast address lookup. */
+	typedef std::map<quint64, CodeLocationPtr> CodeLocationsMap;
+
+
 	CodeLocationFactory();
 
 	/** Returns a CodeLocation instance corresponding to the specified address.
@@ -42,11 +46,9 @@ public:
 	otherwise a cached CodeLocation is used instead and a_IsNew is set to false. */
 	CodeLocationPtr getCodeLocation(quint64 a_Address, bool & a_IsNew);
 
+	const CodeLocationsMap & getAllCodeLocations() const { return m_CodeLocations; }
+
 protected:
-
-	/** The type used for storing the CodeLocation instances with a fast address lookup. */
-	typedef std::map<quint64, CodeLocationPtr> CodeLocationsMap;
-
 
 	/** The map of already-known CodeLocation instances. */
 	CodeLocationsMap m_CodeLocations;

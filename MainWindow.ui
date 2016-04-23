@@ -177,7 +177,7 @@
      <x>0</x>
      <y>0</y>
      <width>1064</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -186,6 +186,8 @@
     </property>
     <addaction name="actProjectNew"/>
     <addaction name="actProjectOpen"/>
+    <addaction name="actProjectSave"/>
+    <addaction name="actProjectSaveAs"/>
     <addaction name="separator"/>
     <addaction name="actProjectExit"/>
    </widget>
@@ -260,6 +262,22 @@
   <action name="actCtxDiffAll">
    <property name="text">
     <string>Diff all</string>
+   </property>
+  </action>
+  <action name="actProjectSave">
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actProjectSaveAs">
+   <property name="text">
+    <string>Save &amp;as...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
  </widget>

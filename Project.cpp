@@ -9,11 +9,14 @@
 #include "Globals.h"
 #include "Project.h"
 #include <unordered_set>
+#include <QIODevice>
+#include <QFile>
 #include "Snapshot.h"
 #include "CodeLocationFactory.h"
 #include "CodeLocationStats.h"
 #include "AllocationPath.h"
 #include "Allocation.h"
+#include "ProjectSaver.h"
 
 
 
@@ -177,6 +180,28 @@ std::vector<AllocationPath> Project::getAllAllocationPathsImmediateChildren(cons
 	}
 
 	return paths;
+}
+
+
+
+
+
+void Project::save(const QString & a_FileName)
+{
+	QFile f(a_FileName);
+	f.open(QFile::WriteOnly);
+	save(f);
+	m_FileName = a_FileName;
+}
+
+
+
+
+
+void Project::save(QIODevice & a_Device)
+{
+	ProjectSaver::saveProject(*this, a_Device);
+	m_HasChangedSinceSave = false;
 }
 
 

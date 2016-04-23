@@ -23,6 +23,7 @@
 
 
 // fwd:
+class QIODevice;
 class Snapshot;
 typedef std::shared_ptr<Snapshot> SnapshotPtr;
 typedef std::list<SnapshotPtr> SnapshotPtrs;
@@ -72,6 +73,7 @@ public:
 	const SnapshotPtrs & getSnapshots() const { return m_Snapshots; }
 
 	CodeLocationFactoryPtr getCodeLocationFactory() { return m_CodeLocationFactory; }
+	const CodeLocationFactoryPtr getCodeLocationFactory() const { return m_CodeLocationFactory; }
 
 	/** Returns the code location stats calculator.
 	The instance keeps track of min, max and avg allocation sizes of each code location. */
@@ -82,6 +84,31 @@ public:
 
 	/** Returns all paths across all snapshots that are immediate children to the specified path. */
 	std::vector<AllocationPath> getAllAllocationPathsImmediateChildren(const AllocationPath & a_Path);
+
+	/** Saves the entire project data into the specified file.
+	Throws an exception on failure. */
+	void save(const QString & a_FileName);
+
+	/** Saves the entire project data into the specified IO device.
+	Throws an exception on failure. */
+	void save(QIODevice & a_Device);
+
+	/** Loads the entire project data from the specified file.
+	Throws an exception on failure. */
+	bool load(const QString & a_FileName);
+
+	/** Loads the entire project data from the specified IO device.
+	Throws an exception on failure. */
+	bool load(QIODevice & a_Device);
+
+	/** Returns the filename used for the last save or load operation.
+	Empty if not saved or loaded yet. */
+	const QString & getFileName() const { return m_FileName; }
+
+	/** Returns true if the project has changed since it was last saved.
+	Upon creation, the project hasn't been saved yet but the flag is still set to true
+	so that a newly created project doesn't prompt for saving. */
+	bool hasChangedSinceSave() const { return m_HasChangedSinceSave; }
 
 signals:
 
@@ -111,6 +138,11 @@ protected:
 	Keeps track of min, max and avg allocation sizes of each code location. */
 	CodeLocationStatsPtr m_CodeLocationStats;
 
+	/** The filename used to load / save the project last. */
+	QString m_FileName;
+
+	/** True iff the project has changed since it was last saved. */
+	bool m_HasChangedSinceSave;
 };
 
 
