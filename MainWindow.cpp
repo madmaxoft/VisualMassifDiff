@@ -26,6 +26,7 @@
 #include "HistoryModel.h"
 #include "HistoryModelHierarchyDelegate.h"
 #include "ProjectLoader.h"
+#include "ProjectSaver.h"
 
 
 
@@ -345,9 +346,23 @@ bool MainWindow::saveProject()
 
 bool MainWindow::saveProject(const QString & a_FileName)
 {
+	// Open the file for writing:
+	QFile f(a_FileName);
+	if (!f.open(QFile::WriteOnly))
+	{
+		QMessageBox::warning(
+			this,
+			tr("VisualMassifDiff: Failed to save project"),
+			tr("Failed to write to file %1").arg(a_FileName)
+		);
+		return false;
+	}
+
+	// Save the project:
 	try
 	{
-		m_Project->save(a_FileName);
+		ProjectSaver::saveProject(*m_Project, f);
+		m_Project->setSaved(a_FileName);
 	}
 	catch (const std::exception & exc)
 	{
