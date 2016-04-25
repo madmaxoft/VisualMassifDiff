@@ -157,13 +157,20 @@ void HistoryModel::resetModel()
 {
 	beginResetModel();
 
-	// Insert all top-level paths:
+	// Insert the root path, to be then expanded:
 	m_GraphedAllocationPaths.clear();
-	m_GraphedAllocationPaths.push_back(std::make_shared<GraphedAllocationPath>(AllocationPath(), AllocationStats()));
+	if (m_Project->getNumSnapshots() > 0)
+	{
+		m_GraphedAllocationPaths.push_back(std::make_shared<GraphedAllocationPath>(AllocationPath(), AllocationStats()));
+	}
 
 	endResetModel();
 
-	expandItem(0);
+	// Expand the root path:
+	if (!m_GraphedAllocationPaths.empty())
+	{
+		expandItem(0);
+	}
 }
 
 
