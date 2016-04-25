@@ -63,6 +63,16 @@ public:
 		throw BinaryIOStreamException("Failed to write const");
 	}
 
+
+	// The read functions throw a BinaryIOStreamException on an error
+	bool        readBool();
+	qint32      readInt32();
+	qint64      readInt64();
+	quint32     readUInt32();
+	quint64     readUInt64();
+	std::string readString();
+	QString     readQString();
+
 protected:
 
 	/** The QIODevice instance that provides the underlying IO operations. */

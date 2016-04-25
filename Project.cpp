@@ -44,12 +44,14 @@ void Project::addSnapshot(SnapshotPtr a_Snapshot)
 		if ((*itr)->getTimestamp() > timestamp)
 		{
 			m_Snapshots.insert(itr, a_Snapshot);
+			m_HasChangedSinceSave = true;
 			emit addedSnapshot(a_Snapshot);
 			return;
 		}
 	}
 	// Timestamp is larger than anything in the collection, append to back:
 	m_Snapshots.push_back(a_Snapshot);
+	m_HasChangedSinceSave = true;
 	emit addedSnapshot(a_Snapshot);
 }
 
@@ -109,6 +111,7 @@ bool Project::checkAndSetCommand(const char * a_Command)
 	if (m_Snapshots.empty())
 	{
 		m_Command.assign(a_Command);
+		m_HasChangedSinceSave = true;
 		return true;
 	}
 
@@ -127,11 +130,32 @@ bool Project::checkAndSetTimeUnit(const char * a_TimeUnit)
 	if (m_Snapshots.empty())
 	{
 		m_TimeUnit.assign(a_TimeUnit);
+		m_HasChangedSinceSave = true;
 		return true;
 	}
 
 	// Snapshots are already present, check the stored time unit:
 	return (m_TimeUnit.compare(a_TimeUnit) == 0);
+}
+
+
+
+
+
+void Project::setCommand(const std::string & a_Command)
+{
+	m_Command = a_Command;
+	m_HasChangedSinceSave = true;
+}
+
+
+
+
+
+void Project::setTimeUnit(const std::string & a_TimeUnit)
+{
+	m_TimeUnit = a_TimeUnit;
+	m_HasChangedSinceSave = true;
 }
 
 

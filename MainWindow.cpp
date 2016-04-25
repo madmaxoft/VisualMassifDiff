@@ -25,6 +25,7 @@
 #include "CodeLocationStatsModel.h"
 #include "HistoryModel.h"
 #include "HistoryModelHierarchyDelegate.h"
+#include "ProjectLoader.h"
 
 
 
@@ -49,23 +50,14 @@ MainWindow::MainWindow(QWidget * parent):
 	m_UI->twSnapshots->addAction(m_UI->actCtxDiffAll);
 
 	// Create a new empty project:
-	m_Project = std::make_shared<Project>();
-	m_CodeLocationStatsModel = std::make_shared<CodeLocationStatsModel>(m_Project);
-	m_CodeLocationStatsSortModel = std::make_shared<QSortFilterProxyModel>();
-	m_CodeLocationStatsSortModel->setSourceModel(m_CodeLocationStatsModel.get());
-	m_CodeLocationStatsSortModel->setSortRole(CodeLocationStatsModel::SortRole);
-	m_UI->tvCodeLocations->setModel(m_CodeLocationStatsSortModel.get());
-	m_HistoryModel = std::make_shared<HistoryModel>(m_Project);
-	m_UI->tvHistory->setModel(m_HistoryModel.get());
+	setProject(std::make_shared<Project>());
+
+	// Set up the History view delegates:
 	m_UI->tvHistory->setItemDelegateForColumn(5, new HistoryModelHierarchyDelegate(this));
 	// m_UI->tvHistory->setItemDelegateForColumn(6, new HistoryModelPositionDelegate(this));
-	m_UI->grHistory->setProject(
-		m_Project,
-		reinterpret_cast<HistoryModel *>(m_HistoryModel.get()),
-		m_UI->tvHistory->selectionModel()
-	);
 
 	// Connect the UI signals / slots:
+	connect(m_UI->actProjectOpen,     SIGNAL(triggered()),                               this, SLOT(loadProject()));
 	connect(m_UI->actProjectSave,     SIGNAL(triggered()),                               this, SLOT(saveProject()));
 	connect(m_UI->actProjectSaveAs,   SIGNAL(triggered()),                               this, SLOT(saveProjectAs()));
 	connect(m_UI->actSnapshotsAdd,    SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
@@ -73,11 +65,6 @@ MainWindow::MainWindow(QWidget * parent):
 	connect(m_UI->twSnapshots,        SIGNAL(itemSelectionChanged()),                    this, SLOT(twItemSelChanged()));
 	connect(m_UI->actCtxDiffSelected, SIGNAL(triggered()),                               this, SLOT(diffSelected()));
 	connect(m_UI->actCtxDiffAll,      SIGNAL(triggered()),                               this, SLOT(diffAll()));
-
-	connect(m_UI->tvHistory, SIGNAL(collapsed(QModelIndex)), m_HistoryModel.get(), SLOT(collapseItem(QModelIndex)));
-	connect(m_UI->tvHistory, SIGNAL(expanded(QModelIndex)),  m_HistoryModel.get(), SLOT(expandItem(QModelIndex)));
-
-	connect(m_HistoryModel.get(), SIGNAL(modelDataChanged()), m_UI->grHistory, SLOT(projectDataChanged()));
 }
 
 
@@ -276,37 +263,121 @@ void MainWindow::diffAll()
 
 
 
-void MainWindow::saveProject()
+void MainWindow::loadProject()
 {
-	if (m_Project->getFileName().isEmpty())
-	{
-		emit saveProjectAs();
-		return;
-	}
-	emit saveProject(m_Project->getFileName());
-}
-
-
-
-
-
-void MainWindow::saveProject(const QString & a_FileName)
-{
-	m_Project->save(a_FileName);
-}
-
-
-
-
-
-void MainWindow::saveProjectAs()
-{
-	auto fileName = QFileDialog::getSaveFileName(nullptr, tr("Save the project file"), QString(), tr("VisualMassifDiff project file (*.vmdp)"));
+	auto fileName = QFileDialog::getOpenFileName(
+		nullptr,                                      // Parent widget
+		tr("Open a project file"),                    // Title
+		QString(),                                    // Initial folder
+		tr("VisualMassifDiff project file (*.vmdp)")  // Filter
+	);
 	if (fileName.isEmpty())
 	{
 		return;
 	}
-	emit saveProject(fileName);
+	emit loadProject(fileName);
+}
+
+
+
+
+
+void MainWindow::loadProject(const QString & a_FileName)
+{
+	// If current project is modified, ask to save:
+
+	if (m_Project->hasChangedSinceSave())
+	{
+	}
+
+	// Load the project from the file:
+	QFile f(a_FileName);
+	if (!f.open(QFile::ReadOnly))
+	{
+		QMessageBox::warning(this,
+			tr("File error"),
+			tr("Failed to open project file\n%1").arg(a_FileName)
+		);
+		return;
+	}
+	ProjectPtr project;
+	try
+	{
+		project = ProjectLoader::loadProject(f);
+	}
+	catch (const std::exception & exc)
+	{
+		QMessageBox::warning(this,
+			tr("File error"),
+			tr("Failed to load project from file\n%1\n\n%2").arg(a_FileName).arg(QString::fromUtf8(exc.what()))
+		);
+		return;
+	}
+	if (project == nullptr)
+	{
+		QMessageBox::warning(this,
+			tr("File error"),
+			tr("Failed to load project from file\n%1").arg(a_FileName)
+		);
+		return;
+	}
+
+	// Replace the currently loaded project:
+	setProject(project);
+}
+
+
+
+
+
+bool MainWindow::saveProject()
+{
+	if (m_Project->getFileName().isEmpty())
+	{
+		return saveProjectAs();
+	}
+	return saveProject(m_Project->getFileName());
+}
+
+
+
+
+
+bool MainWindow::saveProject(const QString & a_FileName)
+{
+	try
+	{
+		m_Project->save(a_FileName);
+	}
+	catch (const std::exception & exc)
+	{
+		QMessageBox::warning(
+			this,
+			tr("VisualMassifDiff: Failed to save project"),
+			tr("Failed to save project: %1").arg(exc.what())
+		);
+		return false;
+	}
+	return true;
+}
+
+
+
+
+
+bool MainWindow::saveProjectAs()
+{
+	auto fileName = QFileDialog::getSaveFileName(
+		nullptr,                                      // Parent widget
+		tr("Save the project file"),                  // Title
+		QString(),                                    // Initial folder
+		tr("VisualMassifDiff project file (*.vmdp)")  // Filter
+	);
+	if (fileName.isEmpty())
+	{
+		return false;
+	}
+	return saveProject(fileName);
 }
 
 
@@ -361,6 +432,75 @@ void MainWindow::showDiffsForSnapshots(const SnapshotPtrs & a_Snapshots)
 	// Show the diffs:
 	auto dlg = new DlgSnapshotDiffs(this);
 	dlg->show(std::move(diffs));
+}
+
+
+
+
+
+bool MainWindow::prepareCurrentProjectForUnload()
+{
+	// If not changed, doesn't need any confirmation
+	if (!m_Project->hasChangedSinceSave())
+	{
+		return true;
+	}
+
+	// Ask the user what to do:
+	auto answer = QMessageBox::question(
+		this,                                                                                    // Parent widget
+		tr("VisualMassifDiff: Save project?"),                                                   // Title
+		tr("Current project has not been saved, would you like to save it now?"),                // Text
+		QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel),  // Buttons
+		QMessageBox::Yes                                                                         // Default button
+	);
+	switch (answer)
+	{
+		case QMessageBox::No:
+		{
+			// User wants to throw away the current project's changes
+			return true;
+		}
+		case QMessageBox::Yes:
+		{
+			return saveProject();
+		}
+		case QMessageBox::Cancel:
+		default:
+		{
+			// User wants to abort any operation and keep the current project as is, unsaved:
+			return false;
+		}
+	}
+}
+
+
+
+
+
+void MainWindow::setProject(ProjectPtr a_Project)
+{
+	// Replace the CodeLocationStats model:
+	auto codeLocationStatsModel = std::make_shared<CodeLocationStatsModel>(a_Project);
+	auto codeLocationStatsSortModel = std::make_shared<QSortFilterProxyModel>();
+	codeLocationStatsSortModel->setSourceModel(codeLocationStatsModel.get());
+	codeLocationStatsSortModel->setSortRole(CodeLocationStatsModel::SortRole);
+	m_UI->tvCodeLocations->setModel(codeLocationStatsSortModel.get());
+	m_CodeLocationStatsModel = codeLocationStatsModel;
+	m_CodeLocationStatsSortModel = codeLocationStatsSortModel;
+
+	// Replace the History model:
+	auto historyModel = std::make_shared<HistoryModel>(a_Project);
+	m_UI->tvHistory->setModel(historyModel.get());
+	m_UI->grHistory->setProject(
+		a_Project,
+		reinterpret_cast<HistoryModel *>(historyModel.get()),
+		m_UI->tvHistory->selectionModel()
+	);
+	m_HistoryModel = historyModel;
+
+	// Replace the current project (and free the old one):
+	m_Project = a_Project;
 }
 
 

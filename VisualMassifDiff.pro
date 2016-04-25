@@ -34,7 +34,8 @@ SOURCES += \
 	HistoryModel.cpp \
 	HistoryModelHierarchyDelegate.cpp \
 	BinaryIOStream.cpp \
-	ProjectSaver.cpp
+	ProjectSaver.cpp \
+	ProjectLoader.cpp
 
 HEADERS  += \
 	Project.h \
@@ -60,7 +61,8 @@ HEADERS  += \
 	AllocationStats.h \
 	HistoryModelHierarchyDelegate.h \
 	BinaryIOStream.h \
-	ProjectSaver.h
+	ProjectSaver.h \
+	ProjectLoader.h
 
 FORMS += \
 	MainWindow.ui \

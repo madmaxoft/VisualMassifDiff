@@ -19,13 +19,6 @@
 
 
 
-/** The magic bytes at the start of a project file used to determine if it is a project file. */
-static const char g_FileMagic[] = "VisualMassifDiff project file\n";
-
-
-
-
-
 ProjectSaver::ProjectSaver(QIODevice & a_IODevice):
 	m_IODevice(a_IODevice),
 	m_IOS(a_IODevice)
@@ -49,7 +42,7 @@ void ProjectSaver::saveProject(const Project & a_Project, QIODevice & a_IODevice
 void ProjectSaver::saveProject(const Project & a_Project)
 {
 	// Write the file header: magic and version:
-	m_IOS.writeConst(g_FileMagic);
+	m_IOS.writeConst(g_ProjectFileMagic);
 	m_IOS.writeUInt32(0);
 
 	// Write settings:

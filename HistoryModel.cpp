@@ -78,6 +78,7 @@ HistoryModel::HistoryModel(ProjectPtr a_Project):
 	m_Project(a_Project)
 {
 	connect(m_Project.get(), SIGNAL(addedSnapshot(SnapshotPtr)), this, SLOT(resetModel()));
+	resetModel();
 }
 
 

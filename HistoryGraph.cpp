@@ -35,7 +35,11 @@ void HistoryGraph::setProject(ProjectPtr a_Project, HistoryModel * a_Model, QIte
 	m_Project = a_Project;
 	m_Model = a_Model;
 	m_Selection = a_Selection;
+
+	// Set up UI update handlers:
+	connect(a_Model,     SIGNAL(modelDataChanged()),                              this, SLOT(projectDataChanged()));
 	connect(m_Selection, SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(selectionChanged()));
+
 	projectDataChanged();
 }
 
@@ -208,7 +212,6 @@ int HistoryGraph::projectionY(quint64 a_ValueY)
 void HistoryGraph::projectCodeLocationsY(Snapshot * a_Snapshot, std::vector<int> & a_OutCoords)
 {
 	quint64 acc = 0;
-	auto root = a_Snapshot->getRootAllocation();
 	const auto & graphedPaths = m_Model->getGraphedAllocationPaths();
 	auto numGraphedPaths = graphedPaths.size();
 	for (size_t idx = 0; idx < numGraphedPaths; idx++)

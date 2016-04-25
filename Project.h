@@ -70,6 +70,9 @@ public:
 	std::string getCommand(void) const { return m_Command; }
 	std::string getTimeUnit(void) const { return m_TimeUnit; }
 
+	void setCommand(const std::string & a_Command);
+	void setTimeUnit(const std::string & a_TimeUnit);
+
 	const SnapshotPtrs & getSnapshots() const { return m_Snapshots; }
 
 	CodeLocationFactoryPtr getCodeLocationFactory() { return m_CodeLocationFactory; }
@@ -144,6 +147,14 @@ protected:
 	/** True iff the project has changed since it was last saved. */
 	bool m_HasChangedSinceSave;
 };
+
+
+
+
+
+/** The magic bytes at the start of a project file used to determine if it is a project file.
+Shared between the ProjectSaver and ProjectLoader classes. */
+static const char g_ProjectFileMagic[] = "VisualMassifDiff project file\n";
 
 
 

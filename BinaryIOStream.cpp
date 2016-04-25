@@ -136,3 +136,99 @@ void BinaryIOStream::writeString(const QString & a_Value)
 
 
 
+
+bool BinaryIOStream::readBool()
+{
+	char v;
+	auto numBytesRead = m_IODevice.read(&v, 1);
+	if (numBytesRead != 1)
+	{
+		throw BinaryIOStreamException("Failed to read bool");
+	}
+	return (v != 0);
+}
+
+
+
+
+
+qint32 BinaryIOStream::readInt32()
+{
+	return static_cast<qint32>(readUInt32());
+}
+
+
+
+
+qint64 BinaryIOStream::readInt64()
+{
+	return static_cast<qint64>(readUInt64());
+}
+
+
+
+
+
+quint32 BinaryIOStream::readUInt32()
+{
+	unsigned char v[4];
+	auto numBytesRead = m_IODevice.read(reinterpret_cast<char *>(v), 4);
+	if (numBytesRead != 4)
+	{
+		throw BinaryIOStreamException("Failed to read UInt32");
+	}
+	return ((v[0] << 24) | (v[1] << 16) | (v[2] << 8) | v[3]);
+}
+
+
+
+
+
+quint64 BinaryIOStream::readUInt64()
+{
+	quint64 upper = readUInt32();
+	quint64 lower = readUInt32();
+	return (upper << 32) | lower;
+}
+
+
+
+
+
+std::string BinaryIOStream::readString()
+{
+	auto len = readUInt64();
+	if (len > std::numeric_limits<size_t>::max() - 1)
+	{
+		throw BinaryIOStreamException("String sanity check failed");
+	}
+	std::string res;
+	res.reserve(len);
+	static const size_t BUF_SIZE = 4096;
+	while (len > 0)
+	{
+		char buf[BUF_SIZE];
+		size_t toRead = std::min<size_t>(len, sizeof(buf));
+		if (m_IODevice.read(buf, toRead) != static_cast<qint64>(toRead))
+		{
+			throw BinaryIOStreamException("Failed to read part of string");
+		}
+		res.append(buf, toRead);
+		len -= toRead;
+	}
+	return res;
+}
+
+
+
+
+
+QString BinaryIOStream::readQString()
+{
+	auto utf8 = readString();
+	return QString::fromUtf8(utf8.c_str(), static_cast<int>(utf8.size()));
+}
+
+
+
+

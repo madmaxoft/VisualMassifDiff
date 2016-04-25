@@ -94,15 +94,24 @@ public slots:
 	/** Creates a diff between all snapshots and shows it in a separate dialog. */
 	void diffAll();
 
+	/** Asks the user to select an existing file, then loads the project from that file. */
+	void loadProject();
+
+	/** Loads the project from the specified filename. */
+	void loadProject(const QString & a_FileName);
+
 	/** Saves the project to the file it was read from / saved to last.
-	If the project has no filename attached yet, uses the SaveFile dialog to let the user choose. */
-	void saveProject();
+	If the project has no filename attached yet, uses the SaveFile dialog to let the user choose.
+	Returns true if the project has been saved, false on error or user cancel. */
+	bool saveProject();
 
-	/** Saves the project into the specified file. */
-	void saveProject(const QString & a_FileName);
+	/** Saves the project into the specified file.
+	Returns true if successful, false on any kind of an error. */
+	bool saveProject(const QString & a_FileName);
 
-	/** Asks the user to select a file name, then saves the project to that file. */
-	void saveProjectAs();
+	/** Asks the user to select a file name, then saves the project to that file.
+	Returns true if the project has been saved, false on error or if the user cancels. */
+	bool saveProjectAs();
 
 private:
 
@@ -131,6 +140,15 @@ private:
 
 	/** Displays a new DlgSnapshotDiffs for diffs created between the specified snapshots. */
 	void showDiffsForSnapshots(const SnapshotPtrs & a_Snapshots);
+
+	/** If the current project is modified, asks the user whether to save it.
+	Returns true if the project can unload (has been saved or didn't need saving.
+	Returns false if the user cancelled or an error has occured. */
+	bool prepareCurrentProjectForUnload();
+
+	/** Sets the specified project as the current project.
+	Updates all views and models based on the new project. */
+	void setProject(ProjectPtr a_Project);
 };
 
 
