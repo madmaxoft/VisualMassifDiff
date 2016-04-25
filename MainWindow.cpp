@@ -516,6 +516,14 @@ void MainWindow::setProject(ProjectPtr a_Project)
 
 	// Replace the current project (and free the old one):
 	m_Project = a_Project;
+
+	// Insert the snapshots into twSnapshots:
+	m_UI->twSnapshots->clear();
+	for (const auto & s: m_Project->getSnapshots())
+	{
+		auto item = createSnapshotTreeItem(s);
+		m_UI->twSnapshots->addTopLevelItem(item);
+	}
 }
 
 
