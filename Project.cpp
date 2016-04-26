@@ -23,7 +23,8 @@
 
 Project::Project():
 	m_CodeLocationFactory(std::make_shared<CodeLocationFactory>()),
-	m_CodeLocationStats(std::make_shared<CodeLocationStats>(this))
+	m_CodeLocationStats(std::make_shared<CodeLocationStats>(this)),
+	m_HasChangedSinceSave(false)
 {
 }
 

@@ -94,6 +94,10 @@ public slots:
 	/** Creates a diff between all snapshots and shows it in a separate dialog. */
 	void diffAll();
 
+	/** Disposes the current project, and creates a new one.
+	Asks the user for confirmation / save if the current project has been changed. */
+	void newProject();
+
 	/** Asks the user to select an existing file, then loads the project from that file. */
 	void loadProject();
 

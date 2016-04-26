@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget * parent):
 	// m_UI->tvHistory->setItemDelegateForColumn(6, new HistoryModelPositionDelegate(this));
 
 	// Connect the UI signals / slots:
+	connect(m_UI->actProjectNew,      SIGNAL(triggered()),                               this, SLOT(newProject()));
 	connect(m_UI->actProjectOpen,     SIGNAL(triggered()),                               this, SLOT(loadProject()));
 	connect(m_UI->actProjectSave,     SIGNAL(triggered()),                               this, SLOT(saveProject()));
 	connect(m_UI->actProjectSaveAs,   SIGNAL(triggered()),                               this, SLOT(saveProjectAs()));
@@ -264,6 +265,22 @@ void MainWindow::diffAll()
 
 
 
+void MainWindow::newProject()
+{
+	// Ask the user whether to save current project (if appropriate):
+	if (!prepareCurrentProjectForUnload())
+	{
+		return;
+	}
+
+	// Create and set a new project:
+	setProject(std::make_shared<Project>());
+}
+
+
+
+
+
 void MainWindow::loadProject()
 {
 	auto fileName = QFileDialog::getOpenFileName(
@@ -276,7 +293,7 @@ void MainWindow::loadProject()
 	{
 		return;
 	}
-	emit loadProject(fileName);
+	loadProject(fileName);
 }
 
 
@@ -285,10 +302,10 @@ void MainWindow::loadProject()
 
 void MainWindow::loadProject(const QString & a_FileName)
 {
-	// If current project is modified, ask to save:
-
-	if (m_Project->hasChangedSinceSave())
+	// Ask the user whether to save current project (if appropriate):
+	if (!prepareCurrentProjectForUnload())
 	{
+		return;
 	}
 
 	// Load the project from the file:
@@ -322,6 +339,9 @@ void MainWindow::loadProject(const QString & a_FileName)
 		);
 		return;
 	}
+
+	// Mark the project as non-dirty:
+	project->setSaved(a_FileName);
 
 	// Replace the currently loaded project:
 	setProject(project);
