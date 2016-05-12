@@ -3,6 +3,7 @@
 
 # Collected test data:
 Data/
+*.massif
 
 # Compiled Object files
 *.slo
@@ -19,9 +20,6 @@ Data/
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-
 # Compiled Static libraries
 *.lai
 *.la
@@ -35,3 +33,6 @@ Data/
 
 # Linux Build folder
 Build/
+
+# Windows vgdb emulator:
+valgrind.sqlite

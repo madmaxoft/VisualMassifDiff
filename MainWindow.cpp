@@ -27,6 +27,11 @@
 #include "HistoryModelHierarchyDelegate.h"
 #include "ProjectLoader.h"
 #include "ProjectSaver.h"
+#include "LiveCaptureSettings.h"
+#include "DlgLiveCaptureSettings.h"
+#include "VgdbComm.h"
+#include "LiveCapture.h"
+#include "DlgLiveCapture.h"
 
 
 
@@ -58,15 +63,16 @@ MainWindow::MainWindow(QWidget * parent):
 	// m_UI->tvHistory->setItemDelegateForColumn(6, new HistoryModelPositionDelegate(this));
 
 	// Connect the UI signals / slots:
-	connect(m_UI->actProjectNew,      SIGNAL(triggered()),                               this, SLOT(newProject()));
-	connect(m_UI->actProjectOpen,     SIGNAL(triggered()),                               this, SLOT(loadProject()));
-	connect(m_UI->actProjectSave,     SIGNAL(triggered()),                               this, SLOT(saveProject()));
-	connect(m_UI->actProjectSaveAs,   SIGNAL(triggered()),                               this, SLOT(saveProjectAs()));
-	connect(m_UI->actSnapshotsAdd,    SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
-	connect(m_UI->twSnapshots,        SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(twItemDblClicked(QTreeWidgetItem *, int)));
-	connect(m_UI->twSnapshots,        SIGNAL(itemSelectionChanged()),                    this, SLOT(twItemSelChanged()));
-	connect(m_UI->actCtxDiffSelected, SIGNAL(triggered()),                               this, SLOT(diffSelected()));
-	connect(m_UI->actCtxDiffAll,      SIGNAL(triggered()),                               this, SLOT(diffAll()));
+	connect(m_UI->actProjectNew,           SIGNAL(triggered()),                               this, SLOT(newProject()));
+	connect(m_UI->actProjectOpen,          SIGNAL(triggered()),                               this, SLOT(loadProject()));
+	connect(m_UI->actProjectSave,          SIGNAL(triggered()),                               this, SLOT(saveProject()));
+	connect(m_UI->actProjectSaveAs,        SIGNAL(triggered()),                               this, SLOT(saveProjectAs()));
+	connect(m_UI->actSnapshotsAdd,         SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
+	connect(m_UI->actSnapshotsLiveCapture, SIGNAL(triggered()),                               this, SLOT(snapshotsLiveCapture()));
+	connect(m_UI->twSnapshots,             SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(twItemDblClicked(QTreeWidgetItem *, int)));
+	connect(m_UI->twSnapshots,             SIGNAL(itemSelectionChanged()),                    this, SLOT(twItemSelChanged()));
+	connect(m_UI->actCtxDiffSelected,      SIGNAL(triggered()),                               this, SLOT(diffSelected()));
+	connect(m_UI->actCtxDiffAll,           SIGNAL(triggered()),                               this, SLOT(diffAll()));
 }
 
 
@@ -117,6 +123,54 @@ void MainWindow::addSnapshotsFromFile(const QString & a_FileName)
 	connect(&parser, SIGNAL(parsedCommand(const char *)),                     this, SLOT(parsedCommand(const char *)));
 	connect(&parser, SIGNAL(parsedTimeUnit(const char *)),                    this, SLOT(parsedTimeUnit(const char *)));
 	parser.parse(file);
+}
+
+
+
+
+
+void MainWindow::snapshotsLiveCapture()
+{
+	// Check that vgdb is available:
+	if (!VgdbComm::checkAvailability())
+	{
+		QMessageBox::warning(this,
+			tr("Live Capture not available"),
+			tr("Cannot start live capture, because Valgrind's \"vgdb\" program is not available.")
+		);
+		return;
+	}
+
+	// Query all the running valgrind instances:
+	auto runningInstances = VgdbComm::listRunningInstances();
+
+	// Ask for the settings:
+	LiveCaptureSettings settings;
+	QFileInfo projFile(m_Project->getFileName());
+	settings.m_SnapshotFolder = projFile.absolutePath();
+	settings.m_SnapshotFileNameFormat = projFile.completeBaseName() + QString::fromUtf8("-%1.massif");
+	DlgLiveCaptureSettings dlgSettings;
+	if (!dlgSettings.show(settings, runningInstances))
+	{
+		return;
+	}
+
+	// If we are to save the project and it hasn't been saved yet, ask for filename:
+	if (settings.m_ShouldSaveProject)
+	{
+		if (m_Project->getFileName().isEmpty())
+		{
+			if (!saveProjectAs())
+			{
+				return;
+			}
+		}
+	}
+
+	// Start live capture:
+	LiveCapture capture(m_Project, settings);
+	DlgLiveCapture dlgCapture;
+	dlgCapture.show(capture, settings);
 }
 
 
@@ -389,7 +443,7 @@ bool MainWindow::saveProject(const QString & a_FileName)
 		QMessageBox::warning(
 			this,
 			tr("VisualMassifDiff: Failed to save project"),
-			tr("Failed to save project: %1").arg(exc.what())
+			tr("Failed to save project to file %1: %2").arg(a_FileName).arg(exc.what())
 		);
 		return false;
 	}
@@ -413,6 +467,33 @@ bool MainWindow::saveProjectAs()
 		return false;
 	}
 	return saveProject(fileName);
+}
+
+
+
+
+
+bool MainWindow::openUnknownFile(const QString & a_FileName)
+{
+	// Check whether the file is a project file:
+	QFile f(a_FileName);
+	if (!f.open(QFile::ReadOnly))
+	{
+		return false;
+	}
+	bool isProject = ProjectLoader::isProjectFile(f);
+	f.close();
+
+	// If the file is a project, load it:
+	if (isProject)
+	{
+		loadProject(a_FileName);
+		return true;
+	}
+
+	// It is not a project, assume it's a snapshot file:
+	addSnapshotsFromFile(a_FileName);
+	return true;
 }
 
 

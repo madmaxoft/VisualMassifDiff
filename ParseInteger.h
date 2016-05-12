@@ -14,7 +14,7 @@
 
 
 template <typename T>
-bool parseInteger(const char * a_Str, T & a_Num)
+bool parseInteger(const char * a_Str, T & a_Num, size_t a_MaxLength = std::numeric_limits<size_t>::max())
 {
 	size_t i = 0;
 	bool isPositive = true;
@@ -30,7 +30,7 @@ bool parseInteger(const char * a_Str, T & a_Num)
 	}
 	if (isPositive)
 	{
-		for (; a_Str[i] != 0; i++)
+		for (; (i < a_MaxLength) && (a_Str[i] != 0); i++)
 		{
 			if ((a_Str[i] < '0') || (a_Str[i] > '9'))
 			{

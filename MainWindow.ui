@@ -199,6 +199,8 @@
     <addaction name="separator"/>
     <addaction name="actSnapshotsExportSelected"/>
     <addaction name="actSnapshotsExportAll"/>
+    <addaction name="separator"/>
+    <addaction name="actSnapshotsLiveCapture"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Snapshots"/>
@@ -278,6 +280,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actSnapshotsLiveCapture">
+   <property name="text">
+    <string>&amp;Live capture...</string>
+   </property>
+   <property name="toolTip">
+    <string>Capture snapshots from a running process</string>
    </property>
   </action>
  </widget>

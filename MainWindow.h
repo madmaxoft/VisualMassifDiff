@@ -65,6 +65,9 @@ public slots:
 	/** Adds snapshots from the specified file into the project. */
 	void addSnapshotsFromFile(const QString & a_FileName);
 
+	/** Lets the user set options of the live capture and starts capturing snapshots from a live process. */
+	void snapshotsLiveCapture();
+
 	/** Displays an error message containing the error. */
 	void parseError(quint32 a_LineNum, const char * a_Msg, const char * a_Line);
 
@@ -116,6 +119,10 @@ public slots:
 	/** Asks the user to select a file name, then saves the project to that file.
 	Returns true if the project has been saved, false on error or if the user cancels. */
 	bool saveProjectAs();
+
+	/** Opens the specified file as a project or adds it as a snapshot, based on the file's contents.
+	Returns true if the file is processed, false otherwise. */
+	bool openUnknownFile(const QString & a_FileName);
 
 private:
 
