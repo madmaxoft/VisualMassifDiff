@@ -162,3 +162,24 @@ ProjectPtr ProjectLoader::loadProject(QIODevice & a_IODevice)
 
 
 
+
+bool ProjectLoader::isProjectFile(QIODevice & a_IODevice)
+{
+	// Check the file magic string at the beginning of the file:
+	char fileMagic[ARRAYCOUNT(g_ProjectFileMagic)];
+	auto bytesRead = a_IODevice.read(fileMagic, sizeof(fileMagic));
+	if (
+		(bytesRead != sizeof(fileMagic)) ||
+		(std::memcmp(fileMagic, g_ProjectFileMagic, sizeof(g_ProjectFileMagic)) != 0)
+	)
+	{
+		return false;
+	}
+
+	// The magic string matches, consider this a project file, regardless of the version:
+	return true;
+}
+
+
+
+

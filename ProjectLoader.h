@@ -50,6 +50,9 @@ public:
 	/** Returns the new loaded project.
 	Throws on failure. */
 	static ProjectPtr loadProject(QIODevice & a_Device);
+
+	/** Returns whether the specified file is a VisualMassifDiff project file. */
+	static bool isProjectFile(QIODevice & a_IODevice);
 };
 
 
