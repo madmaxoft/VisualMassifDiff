@@ -20,10 +20,10 @@ int main(int argc, char *argv[])
 	MainWindow w;
 	w.showMaximized();
 
-	// Any cmd-line parameters are interpreted as filenames to open:
+	// Any cmd-line parameters are interpreted as filenames to open / snapshots to append:
 	for (int i = 1; i < argc; i++)
 	{
-		w.addSnapshotsFromFile(QString::fromUtf8(argv[i]));
+		w.openUnknownFile(QString::fromUtf8(argv[i]));
 	}
 
 	return a.exec();

@@ -35,7 +35,12 @@ SOURCES += \
 	HistoryModelHierarchyDelegate.cpp \
 	BinaryIOStream.cpp \
 	ProjectSaver.cpp \
-	ProjectLoader.cpp
+	ProjectLoader.cpp \
+	DlgLiveCaptureSettings.cpp \
+	VgdbComm.cpp \
+	ProcessReader.cpp \
+    DlgLiveCapture.cpp \
+    LiveCapture.cpp
 
 HEADERS  += \
 	Project.h \
@@ -62,12 +67,20 @@ HEADERS  += \
 	HistoryModelHierarchyDelegate.h \
 	BinaryIOStream.h \
 	ProjectSaver.h \
-	ProjectLoader.h
+	ProjectLoader.h \
+	LiveCaptureSettings.h \
+	DlgLiveCaptureSettings.h \
+	VgdbComm.h \
+	ProcessReader.h \
+    DlgLiveCapture.h \
+    LiveCapture.h
 
 FORMS += \
 	MainWindow.ui \
 	DlgSnapshotDetails.ui \
-	DlgSnapshotDiffs.ui
+	DlgSnapshotDiffs.ui \
+	DlgLiveCaptureSettings.ui \
+    DlgLiveCapture.ui
 
 OTHER_FILES += \
 	.gitignore \
