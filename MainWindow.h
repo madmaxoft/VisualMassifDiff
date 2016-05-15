@@ -22,15 +22,16 @@
 
 
 // fwd:
-class QTreeWidgetItem;
 class QSortFilterProxyModel;
 class QAbstractItemModel;
+class QItemSelection;
 class Project;
 typedef std::shared_ptr<Project> ProjectPtr;
 class Snapshot;
 typedef std::shared_ptr<Snapshot>SnapshotPtr;
 typedef std::list<SnapshotPtr> SnapshotPtrs;
 class CodeLocationStatsModel;
+class SnapshotModel;
 
 
 
@@ -48,11 +49,14 @@ namespace Ui
 class MainWindow:
 	public QMainWindow
 {
+	typedef QMainWindow Super;
+
 	Q_OBJECT
+
 
 public:
 
-	explicit MainWindow(QWidget * parent = nullptr);
+	explicit MainWindow(QWidget * a_Parent = nullptr);
 
 	~MainWindow();
 
@@ -83,10 +87,10 @@ public slots:
 	void parsedTimeUnit(const char * a_TimeUnit);
 
 	/** Triggered when a snapshot is double-clicked in the treeview. */
-	void twItemDblClicked(QTreeWidgetItem * a_Item, int a_Column);
+	void tvItemDblClicked(const QModelIndex & a_Item);
 
 	/** Triggered when the selection in twSnapshots changes. */
-	void twItemSelChanged();
+	void tvItemSelChanged(const QItemSelection & a_Selected, const QItemSelection & a_Deselected);
 
 	/** Opens a snapshot details window for the specified snapshot. */
 	void viewSnapshotDetails(SnapshotPtr a_Snapshot);
@@ -124,6 +128,7 @@ public slots:
 	Returns true if the file is processed, false otherwise. */
 	bool openUnknownFile(const QString & a_FileName);
 
+
 private:
 
 	/** UI, managed by QTCreator */
@@ -132,8 +137,8 @@ private:
 	/** Current project. */
 	ProjectPtr m_Project;
 
-	/**Icon displayed in the tree view if the snapshot has detailed allocations attached to it.  */
-	QIcon m_IcoAllocations;
+	/** The base model for Project's Snapshots. */
+	std::shared_ptr<SnapshotModel> m_ProjectSnapshotsModel;
 
 	/** The basic model for CodeLocation stats. */
 	std::shared_ptr<CodeLocationStatsModel> m_CodeLocationStatsModel;
@@ -144,10 +149,6 @@ private:
 	/** The model used for the allocation history views. */
 	std::shared_ptr<QAbstractItemModel> m_HistoryModel;
 
-
-	/** Creates a treeview item for the specified new snapshot.
-	The item is not inserted into any treewidget. */
-	QTreeWidgetItem * createSnapshotTreeItem(SnapshotPtr a_Snapshot);
 
 	/** Displays a new DlgSnapshotDiffs for diffs created between the specified snapshots. */
 	void showDiffsForSnapshots(const SnapshotPtrs & a_Snapshots);

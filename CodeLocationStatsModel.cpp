@@ -22,14 +22,16 @@ CodeLocationStatsModel::CodeLocationStatsModel(ProjectPtr a_Project):
 	m_Project(a_Project)
 {
 	rebuildModel();
+	connect(a_Project.get(), SIGNAL(addedSnapshot(SnapshotPtr)), this, SLOT(addedSnapshot(SnapshotPtr)));
 }
 
 
 
 
 
-void CodeLocationStatsModel::addedSnapshot()
+void CodeLocationStatsModel::addedSnapshot(SnapshotPtr a_Snapshot)
 {
+	Q_UNUSED(a_Snapshot);
 	rebuildModel();
 }
 

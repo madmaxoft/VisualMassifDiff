@@ -39,8 +39,9 @@ SOURCES += \
 	DlgLiveCaptureSettings.cpp \
 	VgdbComm.cpp \
 	ProcessReader.cpp \
-    DlgLiveCapture.cpp \
-    LiveCapture.cpp
+	DlgLiveCapture.cpp \
+	LiveCapture.cpp \
+	SnapshotModel.cpp
 
 HEADERS  += \
 	Project.h \
@@ -72,15 +73,16 @@ HEADERS  += \
 	DlgLiveCaptureSettings.h \
 	VgdbComm.h \
 	ProcessReader.h \
-    DlgLiveCapture.h \
-    LiveCapture.h
+	DlgLiveCapture.h \
+	LiveCapture.h \
+	SnapshotModel.h
 
 FORMS += \
 	MainWindow.ui \
 	DlgSnapshotDetails.ui \
 	DlgSnapshotDiffs.ui \
 	DlgLiveCaptureSettings.ui \
-    DlgLiveCapture.ui
+	DlgLiveCapture.ui
 
 OTHER_FILES += \
 	.gitignore \

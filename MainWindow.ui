@@ -45,7 +45,7 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QTreeWidget" name="twSnapshots">
+          <widget class="QTreeView" name="tvSnapshots">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>1</horstretch>
@@ -61,42 +61,21 @@
            <property name="textElideMode">
             <enum>Qt::ElideNone</enum>
            </property>
+           <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
            <property name="horizontalScrollMode">
             <enum>QAbstractItemView::ScrollPerPixel</enum>
            </property>
            <property name="indentation">
             <number>0</number>
            </property>
-           <attribute name="headerShowSortIndicator" stdset="0">
+           <property name="sortingEnabled">
             <bool>true</bool>
-           </attribute>
+           </property>
            <attribute name="headerStretchLastSection">
             <bool>false</bool>
            </attribute>
-           <column>
-            <property name="text">
-             <string>Timestamp</string>
-            </property>
-            <property name="textAlignment">
-             <set>AlignRight|AlignVCenter</set>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Heap size (KiB)</string>
-            </property>
-            <property name="textAlignment">
-             <set>AlignRight|AlignVCenter</set>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Heap extra size (KiB)</string>
-            </property>
-            <property name="textAlignment">
-             <set>AlignRight|AlignVCenter</set>
-            </property>
-           </column>
           </widget>
           <widget class="QSplitter" name="splitter">
            <property name="sizePolicy">

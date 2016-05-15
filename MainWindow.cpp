@@ -32,47 +32,40 @@
 #include "VgdbComm.h"
 #include "LiveCapture.h"
 #include "DlgLiveCapture.h"
+#include "SnapshotModel.h"
 
 
 
 
 
-/** Role used as a storage for the snapshot data in the tree widget. */
-const int TW_ITEM_DATAROLE_SNAPSHOT_TIMESTAMP = 1001;
-
-
-
-
-
-MainWindow::MainWindow(QWidget * parent):
-	QMainWindow(parent),
-	m_UI(new Ui::MainWindow),
-	m_IcoAllocations(":/res/icoAllocations.png")
+MainWindow::MainWindow(QWidget * a_Parent):
+	Super(a_Parent),
+	m_UI(new Ui::MainWindow)
 {
 	m_UI->setupUi(this);
 
 	// Add a context menu to twSnapshots:
-	m_UI->twSnapshots->addAction(m_UI->actCtxDiffSelected);
-	m_UI->twSnapshots->addAction(m_UI->actCtxDiffAll);
+	m_UI->tvSnapshots->addAction(m_UI->actCtxDiffSelected);
+	m_UI->tvSnapshots->addAction(m_UI->actCtxDiffAll);
 
 	// Create a new empty project:
 	setProject(std::make_shared<Project>());
+	m_UI->tvSnapshots->sortByColumn(0, Qt::AscendingOrder);  // Qt seems to default to Descending on Win8
 
 	// Set up the History view delegates:
 	m_UI->tvHistory->setItemDelegateForColumn(5, new HistoryModelHierarchyDelegate(this));
 	// m_UI->tvHistory->setItemDelegateForColumn(6, new HistoryModelPositionDelegate(this));
 
 	// Connect the UI signals / slots:
-	connect(m_UI->actProjectNew,           SIGNAL(triggered()),                               this, SLOT(newProject()));
-	connect(m_UI->actProjectOpen,          SIGNAL(triggered()),                               this, SLOT(loadProject()));
-	connect(m_UI->actProjectSave,          SIGNAL(triggered()),                               this, SLOT(saveProject()));
-	connect(m_UI->actProjectSaveAs,        SIGNAL(triggered()),                               this, SLOT(saveProjectAs()));
-	connect(m_UI->actSnapshotsAdd,         SIGNAL(triggered()),                               this, SLOT(addSnapshotsFromFile()));
-	connect(m_UI->actSnapshotsLiveCapture, SIGNAL(triggered()),                               this, SLOT(snapshotsLiveCapture()));
-	connect(m_UI->twSnapshots,             SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(twItemDblClicked(QTreeWidgetItem *, int)));
-	connect(m_UI->twSnapshots,             SIGNAL(itemSelectionChanged()),                    this, SLOT(twItemSelChanged()));
-	connect(m_UI->actCtxDiffSelected,      SIGNAL(triggered()),                               this, SLOT(diffSelected()));
-	connect(m_UI->actCtxDiffAll,           SIGNAL(triggered()),                               this, SLOT(diffAll()));
+	connect(m_UI->actProjectNew,           SIGNAL(triggered()),                        this, SLOT(newProject()));
+	connect(m_UI->actProjectOpen,          SIGNAL(triggered()),                        this, SLOT(loadProject()));
+	connect(m_UI->actProjectSave,          SIGNAL(triggered()),                        this, SLOT(saveProject()));
+	connect(m_UI->actProjectSaveAs,        SIGNAL(triggered()),                        this, SLOT(saveProjectAs()));
+	connect(m_UI->actSnapshotsAdd,         SIGNAL(triggered()),                        this, SLOT(addSnapshotsFromFile()));
+	connect(m_UI->actSnapshotsLiveCapture, SIGNAL(triggered()),                        this, SLOT(snapshotsLiveCapture()));
+	connect(m_UI->tvSnapshots,             SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(tvItemDblClicked(const QModelIndex &)));
+	connect(m_UI->actCtxDiffSelected,      SIGNAL(triggered()),                        this, SLOT(diffSelected()));
+	connect(m_UI->actCtxDiffAll,           SIGNAL(triggered()),                        this, SLOT(diffAll()));
 }
 
 
@@ -204,11 +197,6 @@ void MainWindow::newSnapshotParsed(SnapshotPtr a_Snapshot)
 
 	// Add snapshot to project:
 	m_Project->addSnapshot(a_Snapshot);
-
-	// Add snapshot to list:
-	auto item = createSnapshotTreeItem(a_Snapshot);
-	m_UI->twSnapshots->addTopLevelItem(item);
-	m_CodeLocationStatsModel->addedSnapshot();
 }
 
 
@@ -256,12 +244,9 @@ void MainWindow::parsedTimeUnit(const char * a_TimeUnit)
 
 
 
-void MainWindow::twItemDblClicked(QTreeWidgetItem * a_Item, int a_Column)
+void MainWindow::tvItemDblClicked(const QModelIndex & a_Item)
 {
-	a_Column;
-
-	auto timestamp = a_Item->data(0, TW_ITEM_DATAROLE_SNAPSHOT_TIMESTAMP);
-	auto snapshot = m_Project->getSnapshotAtTimestamp(timestamp.toULongLong());
+	auto snapshot = m_ProjectSnapshotsModel->getItemSnapshot(a_Item);
 	if (snapshot != nullptr)
 	{
 		viewSnapshotDetails(snapshot);
@@ -272,9 +257,12 @@ void MainWindow::twItemDblClicked(QTreeWidgetItem * a_Item, int a_Column)
 
 
 
-void MainWindow::twItemSelChanged()
+void MainWindow::tvItemSelChanged(const QItemSelection & a_Selected, const QItemSelection & a_Deselected)
 {
-	m_UI->actCtxDiffSelected->setEnabled(m_UI->twSnapshots->selectedItems().size() > 1);
+	Q_UNUSED(a_Selected);
+	Q_UNUSED(a_Deselected);
+
+	m_UI->actCtxDiffSelected->setEnabled(m_UI->tvSnapshots->selectionModel()->selectedRows().size() > 1);
 }
 
 
@@ -295,11 +283,10 @@ void MainWindow::diffSelected()
 {
 	// Collect all selected snapshots:
 	SnapshotPtrs snapshots;
-	// foreach(item, m_UI->twSnapshots->selectedItems())
-	for (auto item: m_UI->twSnapshots->selectedItems())
+	for (const auto row: m_UI->tvSnapshots->selectionModel()->selectedRows())
 	{
-		auto timestamp = item->data(0, TW_ITEM_DATAROLE_SNAPSHOT_TIMESTAMP);
-		auto snapshot = m_Project->getSnapshotAtTimestamp(timestamp.toULongLong());
+		auto snapshot = m_ProjectSnapshotsModel->getItemSnapshot(row);
+		assert(snapshot != nullptr);
 		snapshots.push_back(snapshot);
 	}
 
@@ -500,34 +487,14 @@ bool MainWindow::openUnknownFile(const QString & a_FileName)
 
 
 
-QTreeWidgetItem * MainWindow::createSnapshotTreeItem(SnapshotPtr a_Snapshot)
-{
-	QStringList columns;
-	columns << tr("%1").arg(a_Snapshot->getTimestamp());
-	columns << formatMemorySize(a_Snapshot->getHeapSize());
-	columns << formatMemorySize(a_Snapshot->getHeapExtraSize());
-	auto res = new QTreeWidgetItem(columns);
-	res->setData(0, TW_ITEM_DATAROLE_SNAPSHOT_TIMESTAMP, a_Snapshot->getTimestamp());
-	res->setTextAlignment(0, Qt::AlignRight | Qt::AlignVCenter);
-	res->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
-	res->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
-	if (a_Snapshot->hasAllocations())
-	{
-		res->setIcon(0, m_IcoAllocations);
-	}
-	return res;
-}
-
-
-
-
-
 void MainWindow::showDiffsForSnapshots(const SnapshotPtrs & a_Snapshots)
 {
 	// Sort the snapshots by their timestamp:
 	SnapshotPtrs snapshots(a_Snapshots);
 	snapshots.sort([](SnapshotPtr a_First, SnapshotPtr a_Second)
 		{
+			assert(a_First != nullptr);
+			assert(a_Second != nullptr);
 			return (a_First->getTimestamp() < a_Second->getTimestamp());
 		}
 	);
@@ -596,6 +563,16 @@ bool MainWindow::prepareCurrentProjectForUnload()
 
 void MainWindow::setProject(ProjectPtr a_Project)
 {
+	// Replace the ProjectSnapshots model:
+	auto projectSnapshotsModel = std::make_shared<SnapshotModel>(a_Project);
+	m_UI->tvSnapshots->setModel(projectSnapshotsModel.get());
+	m_ProjectSnapshotsModel = projectSnapshotsModel;
+	auto selectionModel = m_UI->tvSnapshots->selectionModel();
+	connect(
+		selectionModel, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+		this,           SLOT(tvItemSelChanged(const QItemSelection &, const QItemSelection &))
+	);
+
 	// Replace the CodeLocationStats model:
 	auto codeLocationStatsModel = std::make_shared<CodeLocationStatsModel>(a_Project);
 	auto codeLocationStatsSortModel = std::make_shared<QSortFilterProxyModel>();
@@ -617,14 +594,6 @@ void MainWindow::setProject(ProjectPtr a_Project)
 
 	// Replace the current project (and free the old one):
 	m_Project = a_Project;
-
-	// Insert the snapshots into twSnapshots:
-	m_UI->twSnapshots->clear();
-	for (const auto & s: m_Project->getSnapshots())
-	{
-		auto item = createSnapshotTreeItem(s);
-		m_UI->twSnapshots->addTopLevelItem(item);
-	}
 }
 
 

@@ -46,13 +46,14 @@ public:
 
 	explicit CodeLocationStatsModel(ProjectPtr a_Project);
 
-	/** Called after a new snapshot has been added to the project.
-	Resets and rebuilds the model. */
-	void addedSnapshot();
-
 signals:
 
+
 public slots:
+
+	/** Called after a new snapshot has been added to the project.
+	Resets and rebuilds the model. */
+	void addedSnapshot(SnapshotPtr a_Snapshot);
 
 protected:
 
