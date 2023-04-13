@@ -69,7 +69,7 @@ Qt::ItemFlags SnapshotDiffModel::flags(const QModelIndex & a_Index) const
 {
 	if (!a_Index.isValid())
 	{
-		return 0;
+		return {};
 	}
 
 	return Super::flags(a_Index);

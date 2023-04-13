@@ -13,6 +13,7 @@
 
 
 
+#include <stdexcept>
 #include <QIODevice>
 
 
